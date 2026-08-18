@@ -7,6 +7,7 @@ import {
   BookOpen,
   Settings2,
   ArrowLeft,
+  type LucideIcon,
 } from "lucide-react";
 import Stars from "@/components/Stars";
 import { livros } from "@/data/livros";
@@ -167,7 +168,7 @@ function LinhaDado({
   label,
   valor,
 }: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: LucideIcon;
   label: string;
   valor: string;
 }) {
