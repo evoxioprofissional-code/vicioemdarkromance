@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export interface Perfil {
@@ -13,6 +14,48 @@ export interface Assinatura {
   plano: string;
   priceCents: number;
   currentPeriodEnd: string | null;
+}
+
+export interface Acesso {
+  userId: string;
+  isAdmin: boolean;
+  ativo: boolean; // assinatura ativa e vigente
+}
+
+// Situação de acesso do usuário logado.
+export async function getAcesso(): Promise<Acesso | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const { data: sub } = await supabase
+    .from("subscriptions")
+    .select("status, current_period_end")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const ativo =
+    sub?.status === "active" &&
+    (!sub.current_period_end || new Date(sub.current_period_end) > new Date());
+
+  return { userId: user.id, isAdmin: prof?.role === "admin", ativo: !!ativo };
+}
+
+// Garante que o usuário tem acesso ao conteúdo (assinante ativo ou admin).
+// Caso contrário, redireciona.
+export async function exigirAcessoConteudo() {
+  const acesso = await getAcesso();
+  if (!acesso) redirect("/entrar?redirect=/plataforma");
+  if (!acesso.isAdmin && !acesso.ativo) redirect("/plataforma/conta?assine=1");
+  return acesso;
 }
 
 // Usuário autenticado (ou null).

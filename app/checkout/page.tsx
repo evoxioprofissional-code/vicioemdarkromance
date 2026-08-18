@@ -70,7 +70,7 @@ function Resumo({ plano }: { plano: Plano }) {
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: { plano?: string };
+  searchParams: { plano?: string; pendente?: string };
 }) {
   const plano = await getPlano(searchParams.plano);
   if (!plano) return notFound();
@@ -98,9 +98,22 @@ export default async function CheckoutPage({
             Falta um passo para o seu vício
           </h1>
           <p className="mt-2 text-white/55">
-            Preencha os dados e ganhe acesso imediato à biblioteca completa.
+            Preencha os dados para assinar e liberar a biblioteca completa.
           </p>
         </div>
+
+        {searchParams.pendente && (
+          <div className="mb-8 rounded-2xl border border-champagne/25 bg-blood-900/20 p-5">
+            <p className="font-display text-lg font-semibold text-champagne">
+              Pagamento em breve
+            </p>
+            <p className="mt-1 text-sm text-white/60">
+              Estamos conectando o meio de pagamento (Pix e cartão via
+              InfinitePay). Assim que estiver ativo, sua assinatura é liberada na
+              hora após o pagamento. Obrigada pela paciência. 🖤
+            </p>
+          </div>
+        )}
 
         <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
           {/* -------- Formulário -------- */}

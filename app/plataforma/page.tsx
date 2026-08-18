@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Play, Plus, LibraryBig, BookMarked } from "lucide-react";
+import { Play, LibraryBig, BookMarked } from "lucide-react";
 import Shelf from "@/components/Shelf";
 import BookCard from "@/components/BookCard";
 import Stars from "@/components/Stars";
@@ -10,8 +10,11 @@ import {
   getPorCategoria,
   getDestaque,
 } from "@/lib/queries/books";
+import { exigirAcessoConteudo } from "@/lib/queries/account";
 
 export default async function PlataformaHome() {
+  await exigirAcessoConteudo();
+
   const [catalogo, destaque, novos, lidos, mafia, inimigos, dark] =
     await Promise.all([
       getCatalogo(),
@@ -63,11 +66,8 @@ export default async function PlataformaHome() {
                 href={`/plataforma/livro/${destaque.id}`}
                 className="btn-primary"
               >
-                <Play size={16} /> Ler agora
+                <Play size={16} /> Abrir livro
               </Link>
-              <button className="btn-ghost">
-                <Plus size={16} /> Minha lista
-              </button>
             </div>
           </div>
 

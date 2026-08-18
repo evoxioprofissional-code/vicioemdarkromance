@@ -4,8 +4,6 @@ import {
   ArrowLeft,
   BookOpen,
   Download,
-  Plus,
-  Share2,
   Clock,
   FileText,
   CalendarDays,
@@ -14,8 +12,11 @@ import BookCover from "@/components/BookCover";
 import BookCard from "@/components/BookCard";
 import Stars from "@/components/Stars";
 import { getLivro, getRelacionados } from "@/lib/queries/books";
+import { exigirAcessoConteudo } from "@/lib/queries/account";
 
 export default async function LivroPage({ params }: { params: { id: string } }) {
+  await exigirAcessoConteudo();
+
   const livro = await getLivro(params.id);
   if (!livro) return notFound();
 
@@ -103,26 +104,30 @@ export default async function LivroPage({ params }: { params: { id: string } }) 
               ))}
             </div>
 
-            {/* ações (mock — sem funcionalidade real) */}
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button className="btn-primary">
-                <BookOpen size={16} /> Ler agora
-              </button>
-              <button className="btn-ghost">
-                <Download size={16} /> Baixar PDF
-              </button>
-              <button
-                className="grid h-11 w-11 place-items-center rounded-full ring-1 ring-white/10 text-white/60 hover:text-white hover:ring-champagne/40"
-                aria-label="Adicionar à lista"
-              >
-                <Plus size={18} />
-              </button>
-              <button
-                className="grid h-11 w-11 place-items-center rounded-full ring-1 ring-white/10 text-white/60 hover:text-white hover:ring-champagne/40"
-                aria-label="Compartilhar"
-              >
-                <Share2 size={18} />
-              </button>
+            {/* ações */}
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              {livro.temPdf ? (
+                <>
+                  <a
+                    href={`/plataforma/livro/${livro.id}/pdf`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary"
+                  >
+                    <BookOpen size={16} /> Ler agora
+                  </a>
+                  <a
+                    href={`/plataforma/livro/${livro.id}/pdf?dl=1`}
+                    className="btn-ghost"
+                  >
+                    <Download size={16} /> Baixar PDF
+                  </a>
+                </>
+              ) : (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2.5 text-sm text-white/45">
+                  <BookOpen size={16} /> PDF em breve
+                </span>
+              )}
             </div>
           </div>
         </div>

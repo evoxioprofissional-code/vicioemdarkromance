@@ -145,13 +145,19 @@ export default async function LandingPage() {
           />
         </Reveal>
 
-        <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-          {previa.map((l, i) => (
-            <Reveal key={l.id} delay={(i % 5) * 70}>
-              <BookCard livro={l} href={`/plataforma/livro/${l.id}`} />
-            </Reveal>
-          ))}
-        </div>
+        {previa.length > 0 ? (
+          <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+            {previa.map((l, i) => (
+              <Reveal key={l.id} delay={(i % 5) * 70}>
+                <BookCard livro={l} href={`/plataforma/livro/${l.id}`} />
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-12 text-center text-white/50">
+            Acervo chegando em breve — assine e seja uma das primeiras a ler. 🖤
+          </p>
+        )}
 
         <div className="mt-12 text-center">
           <Link href="#planos" className="btn-ghost">

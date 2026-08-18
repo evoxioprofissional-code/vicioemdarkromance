@@ -4,12 +4,14 @@ import {
   Mail,
   UserRound,
   BookOpen,
-  Settings2,
   ArrowLeft,
+  Lock,
+  CheckCircle2,
   type LucideIcon,
 } from "lucide-react";
 import Stars from "@/components/Stars";
 import { getPerfil, getMinhaAssinatura, getMeuProgresso } from "@/lib/queries/account";
+import { cancelarAssinatura } from "@/lib/actions/checkout";
 import { brl } from "@/lib/types";
 
 const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
@@ -19,7 +21,11 @@ const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
   inactive: { label: "Inativa", cls: "border-white/15 bg-white/5 text-white/60" },
 };
 
-export default async function ContaPage() {
+export default async function ContaPage({
+  searchParams,
+}: {
+  searchParams: { assine?: string; cancelada?: string };
+}) {
   const [perfil, assinatura, progresso] = await Promise.all([
     getPerfil(),
     getMinhaAssinatura(),
@@ -46,6 +52,29 @@ export default async function ContaPage() {
         <ArrowLeft size={15} /> Voltar ao início
       </Link>
 
+      {/* Avisos */}
+      {searchParams.assine && perfil.role !== "admin" && (
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-champagne/25 bg-blood-900/20 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="flex items-center gap-2 font-display text-lg font-semibold text-champagne">
+              <Lock size={18} /> Conteúdo exclusivo para assinantes
+            </p>
+            <p className="mt-1 text-sm text-white/60">
+              Assine o Acesso Total para liberar a biblioteca completa.
+            </p>
+          </div>
+          <Link href="/checkout?plano=mensal" className="btn-primary !py-2.5 shrink-0">
+            Assinar agora
+          </Link>
+        </div>
+      )}
+      {searchParams.cancelada && (
+        <div className="mt-6 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+          <CheckCircle2 size={16} className="text-champagne" /> Assinatura cancelada. Você
+          tem acesso até o fim do período já pago.
+        </div>
+      )}
+
       {/* Cabeçalho do perfil */}
       <div className="mt-6 flex flex-col items-center gap-5 rounded-3xl border border-white/5 bg-ink-800/40 p-8 text-center sm:flex-row sm:text-left">
         <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blood-700 to-blood-900 font-display text-3xl font-black text-champagne ring-1 ring-champagne/30 shadow-glow">
@@ -59,9 +88,6 @@ export default async function ContaPage() {
             {progresso.length > 0 && ` · ${progresso.length} livros em leitura`}
           </p>
         </div>
-        <button className="btn-ghost !py-2.5">
-          <Settings2 size={15} /> Editar perfil
-        </button>
       </div>
 
       <div className="mt-6 grid gap-6 md:grid-cols-2">
@@ -93,7 +119,11 @@ export default async function ContaPage() {
           </dl>
           <div className="mt-6 flex flex-wrap gap-3">
             {status === "active" ? (
-              <button className="btn-ghost !py-2.5 flex-1 justify-center">Cancelar assinatura</button>
+              <form action={cancelarAssinatura} className="flex-1">
+                <button type="submit" className="btn-ghost !py-2.5 w-full justify-center">
+                  Cancelar assinatura
+                </button>
+              </form>
             ) : (
               <Link href="/checkout?plano=mensal" className="btn-primary !py-2.5 flex-1 justify-center">
                 Ativar assinatura

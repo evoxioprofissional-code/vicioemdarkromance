@@ -38,6 +38,7 @@ export interface Livro {
   destaque?: boolean;
   lancadoEm?: string;
   coverUrl?: string; // imagem de capa enviada (opcional)
+  temPdf?: boolean; // há arquivo PDF disponível
   capa: { de: string; para: string; selo: string };
 }
 
@@ -76,6 +77,7 @@ export function rowToLivro(r: BookRow, coverUrl?: string): Livro {
     destaque: r.destaque ?? undefined,
     lancadoEm: r.lancado_em ?? undefined,
     coverUrl,
+    temPdf: !!r.pdf_path,
     capa: {
       de: r.capa_de ?? "#2a0510",
       para: r.capa_para ?? "#a11d2e",

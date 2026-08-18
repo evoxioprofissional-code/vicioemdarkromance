@@ -5,12 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   Home,
-  Library,
-  LayoutGrid,
   UserRound,
   Lightbulb,
-  Search,
-  Bell,
   LogOut,
   Menu,
   X,
@@ -20,8 +16,6 @@ import { sair } from "@/lib/auth/actions";
 
 const NAV = [
   { href: "/plataforma", label: "Início", icon: Home },
-  { href: "/plataforma?tab=biblioteca", label: "Minha Biblioteca", icon: Library },
-  { href: "/plataforma?tab=categorias", label: "Categorias", icon: LayoutGrid },
   { href: "/plataforma/sugestoes", label: "Sugerir livros", icon: Lightbulb },
   { href: "/plataforma/conta", label: "Minha Conta", icon: UserRound },
 ];
@@ -29,8 +23,10 @@ const NAV = [
 /** Casca da área do assinante: sidebar (desktop) + topbar (mobile). */
 export default function PlatformShell({
   children,
+  inicial = "•",
 }: {
   children: React.ReactNode;
+  inicial?: string;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -111,26 +107,14 @@ export default function PlatformShell({
             <Menu size={18} />
           </button>
 
-          <div className="relative hidden flex-1 sm:block">
-            <Search
-              size={16}
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/35"
-            />
-            <input
-              placeholder="Buscar por título, autora ou gênero…"
-              className="w-full max-w-md rounded-full border border-white/10 bg-ink-800/60 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-white/30 outline-none transition-colors focus:border-champagne/40"
-            />
-          </div>
+          <Logo href="/plataforma" className="lg:hidden" />
 
           <div className="ml-auto flex items-center gap-2">
-            <button className="grid h-10 w-10 place-items-center rounded-full ring-1 ring-white/10 text-white/60 hover:text-white" aria-label="Notificações">
-              <Bell size={17} />
-            </button>
             <Link
               href="/plataforma/conta"
               className="grid h-10 w-10 place-items-center rounded-full bg-blood-800/40 font-display font-bold text-champagne ring-1 ring-champagne/20"
             >
-              M
+              {inicial}
             </Link>
           </div>
         </div>
