@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 const STATUS_VALIDOS = ["pendente", "avaliando", "adicionado", "recusado"];
 
@@ -29,7 +28,7 @@ export async function atualizarStatusSugestao(formData: FormData) {
 
   if (!(await exigirAdmin())) return;
 
-  const db = createAdminClient();
+  const db = await createClient();
   await db.from("book_suggestions").update({ status }).eq("id", id);
   revalidatePath("/admin/sugestoes");
 }

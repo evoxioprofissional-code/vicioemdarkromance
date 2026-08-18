@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 function slugify(s: string): string {
   return s
@@ -31,7 +31,7 @@ export async function criarLivro(formData: FormData) {
   const tags = tagsRaw ? tagsRaw.split(",").filter(Boolean) : [];
   const novo = String(formData.get("novo") ?? "") === "1";
 
-  const admin = createAdminClient();
+  const admin = await createClient();
   const slug = slugify(titulo) || `livro-${Date.now()}`;
 
   // Upload do PDF (se enviado) no bucket privado.

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAcesso } from "@/lib/queries/account";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -29,8 +28,7 @@ export async function GET(
   if (!book?.pdf_path) return NextResponse.redirect(back);
 
   const dl = req.nextUrl.searchParams.get("dl") === "1";
-  const admin = createAdminClient();
-  const { data, error } = await admin.storage
+  const { data, error } = await supabase.storage
     .from("pdfs")
     .createSignedUrl(book.pdf_path, 120, dl ? { download: `${book.titulo}.pdf` } : {});
 

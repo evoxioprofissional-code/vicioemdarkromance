@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Finalizar assinatura.
@@ -31,8 +30,7 @@ export async function cancelarAssinatura() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/entrar?redirect=/plataforma/conta");
 
-  const admin = createAdminClient();
-  await admin
+  await supabase
     .from("subscriptions")
     .update({ status: "canceled", canceled_at: new Date().toISOString() })
     .eq("user_id", user.id);

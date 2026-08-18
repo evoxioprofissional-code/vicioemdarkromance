@@ -15,8 +15,8 @@ import Planos from "@/components/Planos";
 import FAQ from "@/components/FAQ";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/Section";
-import { getCatalogo } from "@/lib/queries/books";
 import { getPlano } from "@/lib/queries/plans";
+import { demoCovers } from "@/lib/demo-covers";
 
 const PROVAS = [
   { valor: "160+", label: "títulos na biblioteca" },
@@ -68,8 +68,7 @@ const DEPOIMENTOS = [
 ];
 
 export default async function LandingPage() {
-  const catalogo = await getCatalogo();
-  const previa = catalogo.slice(0, 10);
+  const previa = demoCovers.slice(0, 10);
   const plano = await getPlano();
 
   return (
@@ -113,7 +112,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="animate-fade-up [animation-delay:150ms]">
-            <HeroMosaic livros={catalogo} />
+            <HeroMosaic livros={demoCovers} />
           </div>
         </div>
 
@@ -145,19 +144,13 @@ export default async function LandingPage() {
           />
         </Reveal>
 
-        {previa.length > 0 ? (
-          <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-            {previa.map((l, i) => (
-              <Reveal key={l.id} delay={(i % 5) * 70}>
-                <BookCard livro={l} href={`/plataforma/livro/${l.id}`} />
-              </Reveal>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-12 text-center text-white/50">
-            Acervo chegando em breve — assine e seja uma das primeiras a ler. 🖤
-          </p>
-        )}
+        <div className="mt-12 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+          {previa.map((l, i) => (
+            <Reveal key={l.id} delay={(i % 5) * 70}>
+              <BookCard livro={l} />
+            </Reveal>
+          ))}
+        </div>
 
         <div className="mt-12 text-center">
           <Link href="#planos" className="btn-ghost">

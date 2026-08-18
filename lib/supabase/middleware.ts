@@ -3,11 +3,17 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config";
 
 /**
- * Renova a sessão do Supabase a cada requisição e protege rotas privadas.
- * Se as variáveis de ambiente ainda não estiverem configuradas, é um no-op
- * (o protótipo continua funcionando no modo mock).
+ * Protege as rotas privadas (/plataforma e /admin).
+ * Em páginas públicas NÃO chamamos o Supabase — isso evita uma ida ao servidor
+ * de autenticação a cada carregamento, deixando o site muito mais rápido.
  */
 export async function updateSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const protegida = path.startsWith("/plataforma") || path.startsWith("/admin");
+
+  // Página pública: segue direto, sem tocar no Supabase.
+  if (!protegida) return NextResponse.next();
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -31,11 +37,7 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-
-  // Área do assinante e admin exigem login.
-  const protegida = path.startsWith("/plataforma") || path.startsWith("/admin");
-  if (protegida && !user) {
+  if (!user) {
     const login = request.nextUrl.clone();
     login.pathname = "/entrar";
     login.searchParams.set("redirect", path);

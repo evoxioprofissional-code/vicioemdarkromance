@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import type { Cliente, StatusAssinatura } from "@/lib/types";
 
 // Meses abreviados p/ os gráficos.
@@ -20,7 +20,7 @@ function mesesEntre(iso: string): number {
 
 // ---- KPIs da dashboard ----
 export async function getDashboard() {
-  const db = createAdminClient();
+  const db = await createClient();
 
   const [{ count: ativos }, { count: totalPerfis }, { data: pagamentos }, { data: cancelamentos }] =
     await Promise.all([
@@ -72,7 +72,7 @@ export async function getDashboard() {
 
 // ---- Série de receita (12 meses) ----
 export async function getReceitaMensal() {
-  const db = createAdminClient();
+  const db = await createClient();
   const { data } = await db
     .from("payments")
     .select("amount_cents, paid_at")
@@ -85,7 +85,7 @@ export async function getReceitaMensal() {
 
 // ---- Novos assinantes por mês (12 meses) ----
 export async function getNovosAssinantesMensal() {
-  const db = createAdminClient();
+  const db = await createClient();
   const { data } = await db.from("profiles").select("created_at");
   return ultimos12Meses((p) => (data ?? [])
     .filter((x) => x.created_at && mesmoMes(x.created_at, p.ano, p.mesIdx))
@@ -94,7 +94,7 @@ export async function getNovosAssinantesMensal() {
 
 // ---- Top livros por leitura ----
 export async function getTopLivros(limite = 5) {
-  const db = createAdminClient();
+  const db = await createClient();
   const { data } = await db
     .from("reading_progress")
     .select("book_id, books(titulo)");
@@ -111,7 +111,7 @@ export async function getTopLivros(limite = 5) {
 
 // ---- Origem das vendas ----
 export async function getOrigemVendas() {
-  const db = createAdminClient();
+  const db = await createClient();
   const { data } = await db.from("profiles").select("origem");
   const total = (data ?? []).length;
   if (!total) return [];
@@ -127,7 +127,7 @@ export async function getOrigemVendas() {
 
 // ---- Lista de clientes ----
 export async function getClientes(): Promise<Cliente[]> {
-  const db = createAdminClient();
+  const db = await createClient();
   const { data } = await db
     .from("admin_clientes")
     .select("*")
@@ -153,7 +153,7 @@ export interface SugestaoAdmin {
 }
 
 export async function getSugestoes(): Promise<SugestaoAdmin[]> {
-  const db = createAdminClient();
+  const db = await createClient();
   const { data } = await db
     .from("admin_sugestoes")
     .select("*")
