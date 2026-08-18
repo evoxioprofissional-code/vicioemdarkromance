@@ -8,6 +8,7 @@ import {
   Library,
   LayoutGrid,
   UserRound,
+  Lightbulb,
   Search,
   Bell,
   LogOut,
@@ -21,6 +22,7 @@ const NAV = [
   { href: "/plataforma", label: "Início", icon: Home },
   { href: "/plataforma?tab=biblioteca", label: "Minha Biblioteca", icon: Library },
   { href: "/plataforma?tab=categorias", label: "Categorias", icon: LayoutGrid },
+  { href: "/plataforma/sugestoes", label: "Sugerir livros", icon: Lightbulb },
   { href: "/plataforma/conta", label: "Minha Conta", icon: UserRound },
 ];
 

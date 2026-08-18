@@ -71,6 +71,32 @@ export async function getMinhaAssinatura(): Promise<Assinatura | null> {
   };
 }
 
+export interface Sugestao {
+  id: string;
+  titulo: string;
+  autora: string | null;
+  comentario: string | null;
+  status: "pendente" | "avaliando" | "adicionado" | "recusado";
+  created_at: string;
+}
+
+// Sugestões de livros enviadas pelo usuário.
+export async function getMinhasSugestoes(): Promise<Sugestao[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("book_suggestions")
+    .select("id, titulo, autora, comentario, status, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []) as Sugestao[];
+}
+
 // Progresso de leitura do usuário (para "continuar lendo").
 export async function getMeuProgresso() {
   const supabase = await createClient();
