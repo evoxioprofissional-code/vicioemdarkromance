@@ -140,6 +140,42 @@ export async function getNaoRenovaram(): Promise<Cliente[]> {
   return todos.filter((c) => c.status === "canceled" || c.status === "past_due");
 }
 
+// ---- Sugestões de livros ----
+export interface SugestaoAdmin {
+  id: string;
+  titulo: string;
+  autora: string | null;
+  comentario: string | null;
+  status: "pendente" | "avaliando" | "adicionado" | "recusado";
+  created_at: string;
+  nome: string | null;
+  email: string | null;
+}
+
+export async function getSugestoes(): Promise<SugestaoAdmin[]> {
+  const db = createAdminClient();
+  const { data } = await db
+    .from("admin_sugestoes")
+    .select("*")
+    .order("created_at", { ascending: false });
+  return (data ?? []) as SugestaoAdmin[];
+}
+
+// Títulos mais pedidos (agrupa por título, ignorando maiúsculas/minúsculas).
+export function maisPedidos(sugestoes: SugestaoAdmin[], limite = 5) {
+  const mapa = new Map<string, { titulo: string; total: number }>();
+  for (const s of sugestoes) {
+    const chave = s.titulo.trim().toLowerCase();
+    const atual = mapa.get(chave);
+    if (atual) atual.total += 1;
+    else mapa.set(chave, { titulo: s.titulo.trim(), total: 1 });
+  }
+  return Array.from(mapa.values())
+    .filter((x) => x.total > 1)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, limite);
+}
+
 function mapCliente(r: any): Cliente {
   return {
     id: r.id,

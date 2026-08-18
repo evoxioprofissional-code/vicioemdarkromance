@@ -9,6 +9,7 @@ import {
   Users,
   UserX,
   BookCopy,
+  Lightbulb,
   Plus,
   Menu,
   X,
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/renovacoes", label: "Não renovaram", icon: UserX },
   { href: "/admin/catalogo", label: "Catálogo & PDFs", icon: BookCopy },
+  { href: "/admin/sugestoes", label: "Sugestões", icon: Lightbulb },
 ];
 
 export default function AdminShell({
