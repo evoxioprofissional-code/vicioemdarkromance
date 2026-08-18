@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config";
 
 /**
  * Renova a sessão do Supabase a cada requisição e protege rotas privadas.
@@ -7,15 +8,9 @@ import { NextResponse, type NextRequest } from "next/server";
  * (o protótipo continua funcionando no modo mock).
  */
 export async function updateSession(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  // Supabase ainda não configurado → segue sem autenticação.
-  if (!url || !key) return NextResponse.next();
-
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
