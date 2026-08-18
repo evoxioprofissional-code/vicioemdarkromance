@@ -63,7 +63,7 @@ const DEPOIMENTOS = [
     nome: "Camila T.",
     tag: "leitora fundadora",
     texto:
-      "Baixo os PDFs e leio no ônibus, na fila, antes de dormir. Melhor gasto de R$ 29 da minha vida — falo sem exagero nenhum.",
+      "Baixo os PDFs e leio no ônibus, na fila, antes de dormir. Melhor gasto de R$ 9,99 da minha vida — falo sem exagero nenhum.",
   },
 ];
 
