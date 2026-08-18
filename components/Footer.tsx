@@ -18,7 +18,6 @@ const COLS = [
       { label: "Central de ajuda", href: "/ajuda" },
       { label: "Como ler os PDFs", href: "/como-ler" },
       { label: "Fale conosco", href: "/contato" },
-      { label: "Status", href: "/status" },
     ],
   },
   {
