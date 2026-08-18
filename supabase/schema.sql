@@ -37,7 +37,7 @@ create trigger on_auth_user_created
 -- ----------------------------------------------------------------
 -- 2) FUNÇÕES AUXILIARES DE SEGURANÇA
 -- ----------------------------------------------------------------
--- É admin?
+-- É admin?  (a função "tem_assinatura_ativa" fica após a tabela subscriptions)
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -47,21 +47,6 @@ as $$
   select exists (
     select 1 from public.profiles
     where id = auth.uid() and role = 'admin'
-  );
-$$;
-
--- Tem assinatura ativa?
-create or replace function public.tem_assinatura_ativa()
-returns boolean
-language sql
-security definer set search_path = public
-stable
-as $$
-  select exists (
-    select 1 from public.subscriptions
-    where user_id = auth.uid()
-      and status = 'active'
-      and (current_period_end is null or current_period_end > now())
   );
 $$;
 
@@ -116,6 +101,21 @@ create table if not exists public.subscriptions (
   created_at             timestamptz not null default now(),
   updated_at             timestamptz not null default now()
 );
+
+-- Tem assinatura ativa? (depende da tabela subscriptions acima)
+create or replace function public.tem_assinatura_ativa()
+returns boolean
+language sql
+security definer set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.subscriptions
+    where user_id = auth.uid()
+      and status = 'active'
+      and (current_period_end is null or current_period_end > now())
+  );
+$$;
 
 -- ----------------------------------------------------------------
 -- 5) PAGAMENTOS
