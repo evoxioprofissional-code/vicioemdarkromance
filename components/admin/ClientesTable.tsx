@@ -2,16 +2,16 @@
 
 import { useMemo, useState } from "react";
 import { Search, Mail, MoreHorizontal } from "lucide-react";
-import type { Cliente, StatusCliente } from "@/data/admin";
+import type { Cliente, StatusAssinatura } from "@/lib/types";
 import { StatusBadge } from "./UI";
 
-type Filtro = "todos" | StatusCliente;
+type Filtro = "todos" | StatusAssinatura;
 
 const FILTROS: { id: Filtro; label: string }[] = [
   { id: "todos", label: "Todos" },
-  { id: "ativo", label: "Ativos" },
-  { id: "inadimplente", label: "Inadimplentes" },
-  { id: "cancelado", label: "Cancelados" },
+  { id: "active", label: "Ativos" },
+  { id: "past_due", label: "Inadimplentes" },
+  { id: "canceled", label: "Cancelados" },
 ];
 
 export default function ClientesTable({

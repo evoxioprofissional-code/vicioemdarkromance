@@ -49,7 +49,7 @@ export default function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link href="/plataforma" className="text-sm text-white/65 transition-colors hover:text-white">
+          <Link href="/entrar" className="text-sm text-white/65 transition-colors hover:text-white">
             Entrar
           </Link>
           <Link href="#planos" className="btn-primary !py-2.5 !text-[13px]">
@@ -82,7 +82,7 @@ export default function Header() {
               </Link>
             ))}
             <div className="mt-2 flex flex-col gap-2">
-              <Link href="/plataforma" className="btn-ghost !py-2.5 justify-center">
+              <Link href="/entrar" className="btn-ghost !py-2.5 justify-center">
                 Entrar
               </Link>
               <Link href="#planos" onClick={() => setOpen(false)} className="btn-primary justify-center">

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import type { Livro } from "@/data/livros";
+import type { Livro } from "@/lib/types";
 import BookCard from "./BookCard";
 
 /** Prateleira horizontal com scroll e setas (categoria da plataforma). */

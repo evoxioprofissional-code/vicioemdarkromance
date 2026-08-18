@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Livro } from "@/data/livros";
+import type { Livro } from "@/lib/types";
 import BookCover from "./BookCover";
 import Stars from "./Stars";
 

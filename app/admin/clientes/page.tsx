@@ -1,19 +1,17 @@
 import { Users, UserCheck, AlertTriangle, UserX } from "lucide-react";
 import { StatCard, AdminHeading } from "@/components/admin/UI";
 import ClientesTable from "@/components/admin/ClientesTable";
-import { clientes } from "@/data/admin";
+import { getClientes } from "@/lib/queries/admin";
 
-export default function ClientesPage() {
-  const ativos = clientes.filter((c) => c.status === "ativo").length;
-  const inadimplentes = clientes.filter((c) => c.status === "inadimplente").length;
-  const cancelados = clientes.filter((c) => c.status === "cancelado").length;
+export default async function ClientesPage() {
+  const clientes = await getClientes();
+  const ativos = clientes.filter((c) => c.status === "active").length;
+  const inadimplentes = clientes.filter((c) => c.status === "past_due").length;
+  const cancelados = clientes.filter((c) => c.status === "canceled").length;
 
   return (
     <div>
-      <AdminHeading
-        titulo="Controle de clientes"
-        sub="Gerencie assinantes, status e cobranças"
-      />
+      <AdminHeading titulo="Controle de clientes" sub="Gerencie assinantes, status e cobranças" />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Total de clientes" valor={String(clientes.length)} icon={<Users size={18} />} destaque />
@@ -23,7 +21,13 @@ export default function ClientesPage() {
       </div>
 
       <div className="mt-6">
-        <ClientesTable clientes={clientes} />
+        {clientes.length > 0 ? (
+          <ClientesTable clientes={clientes} />
+        ) : (
+          <div className="glass rounded-2xl p-10 text-center text-sm text-white/45">
+            Nenhum cliente cadastrado ainda. Assim que as pessoas criarem conta, elas aparecem aqui.
+          </div>
+        )}
       </div>
     </div>
   );

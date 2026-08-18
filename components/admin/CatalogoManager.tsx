@@ -3,14 +3,13 @@
 import { useMemo, useState } from "react";
 import { Search, Pencil, Trash2, FileText, Clock } from "lucide-react";
 import BookCover from "@/components/BookCover";
-import { livros, diasRestantesLancamento } from "@/data/livros";
+import { diasRestantesLancamento, type Livro } from "@/lib/types";
 
 /**
- * Gestão do catálogo. O toggle "Novo lançamento" é interativo (estado local,
- * mock): ativado, o título aparece na vitrine de Novos Lançamentos e sai
- * automaticamente após 5 dias da publicação.
+ * Gestão do catálogo. O toggle "Novo lançamento" mostra os dias restantes na
+ * vitrine (regra de 5 dias). Recebe os livros por prop (dados reais).
  */
-export default function CatalogoManager() {
+export default function CatalogoManager({ livros }: { livros: Livro[] }) {
   const [busca, setBusca] = useState("");
   // estado local do "novo lançamento" por livro (inicia pela regra dos 5 dias)
   const [novos, setNovos] = useState<Record<string, boolean>>(() =>

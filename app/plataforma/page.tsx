@@ -4,16 +4,31 @@ import Shelf from "@/components/Shelf";
 import BookCard from "@/components/BookCard";
 import Stars from "@/components/Stars";
 import {
-  livros,
-  lancamentos,
-  maisLidos,
-  livrosPorCategoria,
-} from "@/data/livros";
+  getCatalogo,
+  getLancamentos,
+  getMaisLidos,
+  getPorCategoria,
+  getDestaque,
+} from "@/lib/queries/books";
 
-// Livro em destaque no banner (o primeiro marcado como destaque)
-const destaque = livros.find((l) => l.destaque) ?? livros[0];
+export default async function PlataformaHome() {
+  const [catalogo, destaque, novos, lidos, mafia, inimigos, dark] =
+    await Promise.all([
+      getCatalogo(),
+      getDestaque(),
+      getLancamentos(),
+      getMaisLidos(),
+      getPorCategoria("Máfia Romance"),
+      getPorCategoria("Inimigos para Amantes"),
+      getPorCategoria("Dark & Forbidden"),
+    ]);
 
-export default function PlataformaHome() {
+  if (!destaque) {
+    return (
+      <p className="text-white/50">Nenhum livro no catálogo ainda.</p>
+    );
+  }
+
   return (
     <div>
       {/* ---------- Banner de destaque ---------- */}
@@ -63,14 +78,11 @@ export default function PlataformaHome() {
       </section>
 
       {/* ---------- Prateleiras por categoria ---------- */}
-      <Shelf titulo="Lançamentos do mês" livros={lancamentos()} />
-      <Shelf titulo="Mais lidos" livros={maisLidos()} />
-      <Shelf titulo="Máfia Romance" livros={livrosPorCategoria("Máfia Romance")} />
-      <Shelf
-        titulo="Inimigos para Amantes"
-        livros={livrosPorCategoria("Inimigos para Amantes")}
-      />
-      <Shelf titulo="Dark & Forbidden" livros={livrosPorCategoria("Dark & Forbidden")} />
+      {novos.length > 0 && <Shelf titulo="Lançamentos do mês" livros={novos} />}
+      <Shelf titulo="Mais lidos" livros={lidos} />
+      <Shelf titulo="Máfia Romance" livros={mafia} />
+      <Shelf titulo="Inimigos para Amantes" livros={inimigos} />
+      <Shelf titulo="Dark & Forbidden" livros={dark} />
 
       {/* ---------- Biblioteca completa ---------- */}
       <section className="mt-6">
@@ -79,10 +91,10 @@ export default function PlataformaHome() {
           <h2 className="font-display text-xl font-bold text-white sm:text-2xl">
             Biblioteca completa
           </h2>
-          <span className="text-sm text-white/40">· {livros.length} títulos</span>
+          <span className="text-sm text-white/40">· {catalogo.length} títulos</span>
         </div>
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-          {livros.map((l) => (
+          {catalogo.map((l) => (
             <BookCard key={l.id} livro={l} href={`/plataforma/livro/${l.id}`} />
           ))}
         </div>

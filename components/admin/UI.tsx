@@ -1,5 +1,5 @@
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import type { StatusCliente } from "@/data/admin";
+import type { StatusAssinatura } from "@/lib/types";
 
 /** Card de KPI com valor, rótulo e variação. */
 export function StatCard({
@@ -70,15 +70,16 @@ export function AdminHeading({
 }
 
 const STATUS: Record<
-  StatusCliente,
+  StatusAssinatura,
   { label: string; cls: string }
 > = {
-  ativo: { label: "Ativo", cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
-  inadimplente: { label: "Inadimplente", cls: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
-  cancelado: { label: "Cancelado", cls: "border-blood-600/40 bg-blood-900/30 text-blood-500" },
+  active: { label: "Ativo", cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
+  past_due: { label: "Inadimplente", cls: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
+  canceled: { label: "Cancelado", cls: "border-blood-600/40 bg-blood-900/30 text-blood-500" },
+  inactive: { label: "Inativo", cls: "border-white/15 bg-white/5 text-white/55" },
 };
 
-export function StatusBadge({ status }: { status: StatusCliente }) {
+export function StatusBadge({ status }: { status: StatusAssinatura }) {
   const s = STATUS[status];
   return (
     <span

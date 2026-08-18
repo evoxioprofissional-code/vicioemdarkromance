@@ -1,4 +1,4 @@
-import type { Livro } from "@/data/livros";
+import type { Livro } from "@/lib/types";
 
 /**
  * Capa "premium" gerada 100% via CSS — sem imagens externas.

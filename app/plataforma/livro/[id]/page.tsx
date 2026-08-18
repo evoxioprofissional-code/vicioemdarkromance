@@ -13,18 +13,13 @@ import {
 import BookCover from "@/components/BookCover";
 import BookCard from "@/components/BookCard";
 import Stars from "@/components/Stars";
-import { getLivro, relacionados, livros } from "@/data/livros";
+import { getLivro, getRelacionados } from "@/lib/queries/books";
 
-// Gera as rotas estáticas dos livros
-export function generateStaticParams() {
-  return livros.map((l) => ({ id: l.id }));
-}
-
-export default function LivroPage({ params }: { params: { id: string } }) {
-  const livro = getLivro(params.id);
+export default async function LivroPage({ params }: { params: { id: string } }) {
+  const livro = await getLivro(params.id);
   if (!livro) return notFound();
 
-  const sugestoes = relacionados(livro);
+  const sugestoes = await getRelacionados(livro);
   const meta = [
     { icon: FileText, label: "Páginas", valor: String(livro.paginas) },
     { icon: Clock, label: "Leitura", valor: `~${Math.round(livro.paginas / 45)}h` },

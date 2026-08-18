@@ -2,12 +2,15 @@ import Link from "next/link";
 import { Plus, BookCopy, Clock, Star } from "lucide-react";
 import { StatCard, AdminHeading } from "@/components/admin/UI";
 import CatalogoManager from "@/components/admin/CatalogoManager";
-import { livros, emLancamento } from "@/data/livros";
+import { getCatalogo } from "@/lib/queries/books";
+import { emLancamento } from "@/lib/types";
 
-export default function CatalogoPage() {
+export default async function CatalogoPage() {
+  const livros = await getCatalogo();
   const emVitrine = livros.filter((l) => emLancamento(l)).length;
-  const notaMedia =
-    livros.reduce((s, l) => s + l.nota, 0) / livros.length;
+  const notaMedia = livros.length
+    ? livros.reduce((s, l) => s + l.nota, 0) / livros.length
+    : 0;
 
   return (
     <div>
@@ -24,7 +27,7 @@ export default function CatalogoPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Títulos no acervo" valor={String(livros.length)} icon={<BookCopy size={18} />} destaque />
         <StatCard label="Em novos lançamentos" valor={String(emVitrine)} icon={<Clock size={18} />} />
-        <StatCard label="Nota média" valor={notaMedia.toFixed(1).replace(".", ",")} icon={<Star size={18} />} />
+        <StatCard label="Nota média" valor={notaMedia ? notaMedia.toFixed(1).replace(".", ",") : "—"} icon={<Star size={18} />} />
       </div>
 
       <div className="mt-4 rounded-xl border border-champagne/15 bg-blood-900/15 px-4 py-3 text-sm text-white/60">
@@ -34,7 +37,13 @@ export default function CatalogoPage() {
       </div>
 
       <div className="mt-6">
-        <CatalogoManager />
+        {livros.length > 0 ? (
+          <CatalogoManager livros={livros} />
+        ) : (
+          <div className="glass rounded-2xl p-10 text-center text-sm text-white/45">
+            Nenhum livro cadastrado. Clique em “Adicionar livro” para começar.
+          </div>
+        )}
       </div>
     </div>
   );

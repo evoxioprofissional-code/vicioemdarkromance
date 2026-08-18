@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Protótipo visual: capas são geradas via CSS (gradiente + tipografia),
-  // então não precisamos configurar domínios de imagem remota.
+  experimental: {
+    // Permite upload de PDFs maiores via Server Actions (admin → catálogo).
+    serverActions: { bodySizeLimit: "50mb" },
+  },
 };
 
 export default nextConfig;

@@ -1,10 +1,16 @@
+import { redirect } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
+import { getPerfil } from "@/lib/queries/account";
 
-// Painel administrativo (protótipo — dados mockados, sem back-end).
-export default function AdminLayout({
+// Painel administrativo — exige usuário com papel "admin".
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const perfil = await getPerfil();
+  if (!perfil) redirect("/entrar?redirect=/admin");
+  if (perfil.role !== "admin") redirect("/plataforma");
+
   return <AdminShell>{children}</AdminShell>;
 }

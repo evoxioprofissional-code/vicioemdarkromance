@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { notFound } from "next/navigation";
 import {
   Lock,
   ShieldCheck,
@@ -8,16 +8,17 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Logo from "@/components/Logo";
-import { getPlano } from "@/data/planos";
+import { getPlano } from "@/lib/queries/plans";
+import { finalizarAssinatura } from "@/lib/actions/checkout";
+import type { Plano } from "@/lib/types";
 
 // ============================================================
-//  CHECKOUT — PROTÓTIPO VISUAL
-//  Nenhum pagamento é processado. Não há validação de campos
-//  nem back-end: o botão "Finalizar" apenas entra na plataforma.
+//  CHECKOUT
+//  O formulário de cartão é visual (gateway ainda não conectado).
+//  O botão "Finalizar" ativa a assinatura do usuário logado.
 // ============================================================
 
-function Resumo({ planoId }: { planoId: string }) {
-  const plano = getPlano(planoId);
+function Resumo({ plano }: { plano: Plano }) {
   return (
     <aside className="glass-strong h-fit rounded-2xl p-7 lg:sticky lg:top-8">
       <h2 className="font-display text-xl font-bold text-white">Resumo do plano</h2>
@@ -66,12 +67,13 @@ function Resumo({ planoId }: { planoId: string }) {
   );
 }
 
-export default function CheckoutPage({
+export default async function CheckoutPage({
   searchParams,
 }: {
   searchParams: { plano?: string };
 }) {
-  const planoId = searchParams.plano ?? "trimestral";
+  const plano = await getPlano(searchParams.plano);
+  if (!plano) return notFound();
 
   return (
     <main className="relative min-h-screen">
@@ -101,9 +103,10 @@ export default function CheckoutPage({
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
-          {/* -------- Formulário (somente layout, sem validação) -------- */}
-          {/* mock: o formulário não envia nada; o CTA é um link para a plataforma */}
-          <form className="glass rounded-2xl p-7 sm:p-8">
+          {/* -------- Formulário -------- */}
+          {/* Campos de cartão são visuais (gateway ainda não conectado);
+              o submit ativa a assinatura do usuário logado. */}
+          <form action={finalizarAssinatura} className="glass rounded-2xl p-7 sm:p-8">
             {/* Dados da conta */}
             <h3 className="mb-4 font-display text-lg font-semibold text-white">
               Seus dados
@@ -152,13 +155,12 @@ export default function CheckoutPage({
               </span>
             </label>
 
-            {/* CTA mock: apenas entra na plataforma */}
-            <Link
-              href="/plataforma"
+            <button
+              type="submit"
               className="btn-primary mt-7 w-full justify-center !py-4 text-base"
             >
               <Lock size={16} /> Finalizar assinatura
-            </Link>
+            </button>
 
             <p className="mt-4 flex items-center justify-center gap-2 text-[11px] text-white/35">
               <ShieldCheck size={14} className="text-champagne" />
@@ -166,9 +168,7 @@ export default function CheckoutPage({
             </p>
           </form>
 
-          <Suspense>
-            <Resumo planoId={planoId} />
-          </Suspense>
+          <Resumo plano={plano} />
         </div>
       </div>
     </main>

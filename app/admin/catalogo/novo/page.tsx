@@ -3,7 +3,11 @@ import { ArrowLeft } from "lucide-react";
 import { AdminHeading } from "@/components/admin/UI";
 import NovoLivroForm from "@/components/admin/NovoLivroForm";
 
-export default function NovoLivroPage() {
+export default function NovoLivroPage({
+  searchParams,
+}: {
+  searchParams: { erro?: string };
+}) {
   return (
     <div>
       <Link
@@ -12,11 +16,8 @@ export default function NovoLivroPage() {
       >
         <ArrowLeft size={15} /> Voltar ao catálogo
       </Link>
-      <AdminHeading
-        titulo="Adicionar livro"
-        sub="Envie o PDF, defina a capa e publique no catálogo"
-      />
-      <NovoLivroForm />
+      <AdminHeading titulo="Adicionar livro" sub="Envie o PDF, defina a capa e publique no catálogo" />
+      <NovoLivroForm erro={searchParams.erro} />
     </div>
   );
 }

@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import Logo from "./Logo";
+import { sair } from "@/lib/auth/actions";
 
 const NAV = [
   { href: "/plataforma", label: "Início", icon: Home },
@@ -74,9 +75,9 @@ export default function PlatformShell({
         <div className="mt-auto">
           <div className="rule mb-4" />
           <div className="glass rounded-xl p-4">
-            <p className="text-xs font-semibold text-champagne">Acesso Total · R$ 9,99/mês</p>
+            <p className="text-xs font-semibold text-champagne">Sua assinatura</p>
             <p className="mt-1 text-[11px] text-white/45">
-              Renova em 12 de setembro
+              Veja o status e gerencie seu plano.
             </p>
             <Link
               href="/plataforma/conta"
@@ -85,12 +86,14 @@ export default function PlatformShell({
               Gerenciar assinatura
             </Link>
           </div>
-          <Link
-            href="/"
-            className="mt-3 flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-white/45 transition-colors hover:text-white"
-          >
-            <LogOut size={17} /> Sair
-          </Link>
+          <form action={sair}>
+            <button
+              type="submit"
+              className="mt-3 flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-white/45 transition-colors hover:text-white"
+            >
+              <LogOut size={17} /> Sair
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -153,12 +156,14 @@ export default function PlatformShell({
             </div>
             <div className="my-6 rule" />
             <NavList />
-            <Link
-              href="/"
-              className="mt-auto flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-white/45 hover:text-white"
-            >
-              <LogOut size={17} /> Sair
-            </Link>
+            <form action={sair} className="mt-auto">
+              <button
+                type="submit"
+                className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm text-white/45 hover:text-white"
+              >
+                <LogOut size={17} /> Sair
+              </button>
+            </form>
           </aside>
         </div>
       )}

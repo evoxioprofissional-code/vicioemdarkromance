@@ -15,7 +15,8 @@ import Planos from "@/components/Planos";
 import FAQ from "@/components/FAQ";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/Section";
-import { livros } from "@/data/livros";
+import { getCatalogo } from "@/lib/queries/books";
+import { getPlano } from "@/lib/queries/plans";
 
 const PROVAS = [
   { valor: "160+", label: "títulos na biblioteca" },
@@ -66,8 +67,10 @@ const DEPOIMENTOS = [
   },
 ];
 
-export default function LandingPage() {
-  const previa = livros.slice(0, 10);
+export default async function LandingPage() {
+  const catalogo = await getCatalogo();
+  const previa = catalogo.slice(0, 10);
+  const plano = await getPlano();
 
   return (
     <main className="relative overflow-x-hidden">
@@ -110,7 +113,7 @@ export default function LandingPage() {
           </div>
 
           <div className="animate-fade-up [animation-delay:150ms]">
-            <HeroMosaic />
+            <HeroMosaic livros={catalogo} />
           </div>
         </div>
 
@@ -204,7 +207,7 @@ export default function LandingPage() {
         </Reveal>
         <div className="mt-14">
           <Reveal>
-            <Planos />
+            {plano && <Planos plano={plano} />}
           </Reveal>
         </div>
         <p className="mt-6 text-center text-xs text-white/35">

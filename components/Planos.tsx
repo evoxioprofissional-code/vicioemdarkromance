@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { Check, Crown, ShieldCheck } from "lucide-react";
-import { planos } from "@/data/planos";
+import type { Plano } from "@/lib/types";
 
-/** Oferta única de assinatura. O botão "Assinar" leva ao checkout. */
-export default function Planos() {
-  const plano = planos[0];
-
+/** Oferta única de assinatura. Recebe o plano por prop (dados reais). */
+export default function Planos({ plano }: { plano: Plano }) {
   return (
     <div className="mx-auto max-w-md">
       <div className="glass-strong relative flex flex-col rounded-3xl p-8 shadow-glow ring-1 ring-champagne/30">
@@ -14,9 +12,7 @@ export default function Planos() {
         </span>
 
         <div className="text-center">
-          <h3 className="font-display text-2xl font-bold text-white">
-            {plano.nome}
-          </h3>
+          <h3 className="font-display text-2xl font-bold text-white">{plano.nome}</h3>
           <p className="mt-1 text-xs uppercase tracking-widest text-white/40">
             Acesso ilimitado à biblioteca
           </p>

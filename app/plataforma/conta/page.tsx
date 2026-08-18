@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   Crown,
-  CreditCard,
   Mail,
   UserRound,
   BookOpen,
@@ -10,22 +9,34 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Stars from "@/components/Stars";
-import { livros } from "@/data/livros";
+import { getPerfil, getMinhaAssinatura, getMeuProgresso } from "@/lib/queries/account";
+import { brl } from "@/lib/types";
 
-// ============================================================
-//  MINHA CONTA — PROTÓTIPO VISUAL (dados fictícios, sem lógica)
-// ============================================================
-
-const PERFIL = {
-  nome: "Marina Oliveira",
-  email: "marina.oliveira@email.com",
-  desde: "Janeiro de 2026",
-  lidos: 27,
+const STATUS_LABEL: Record<string, { label: string; cls: string }> = {
+  active: { label: "Ativa", cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
+  past_due: { label: "Pagamento pendente", cls: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
+  canceled: { label: "Cancelada", cls: "border-blood-600/40 bg-blood-900/30 text-blood-500" },
+  inactive: { label: "Inativa", cls: "border-white/15 bg-white/5 text-white/60" },
 };
 
-const lendo = livros.slice(0, 4);
+export default async function ContaPage() {
+  const [perfil, assinatura, progresso] = await Promise.all([
+    getPerfil(),
+    getMinhaAssinatura(),
+    getMeuProgresso(),
+  ]);
 
-export default function ContaPage() {
+  if (!perfil) {
+    return <p className="text-white/50">Faça login para ver sua conta.</p>;
+  }
+
+  const status = assinatura?.status ?? "inactive";
+  const st = STATUS_LABEL[status];
+  const desde = new Date(perfil.createdAt).toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <div className="mx-auto max-w-4xl">
       <Link
@@ -35,18 +46,17 @@ export default function ContaPage() {
         <ArrowLeft size={15} /> Voltar ao início
       </Link>
 
-      {/* ---------- Cabeçalho do perfil ---------- */}
+      {/* Cabeçalho do perfil */}
       <div className="mt-6 flex flex-col items-center gap-5 rounded-3xl border border-white/5 bg-ink-800/40 p-8 text-center sm:flex-row sm:text-left">
         <span className="grid h-20 w-20 shrink-0 place-items-center rounded-full bg-gradient-to-br from-blood-700 to-blood-900 font-display text-3xl font-black text-champagne ring-1 ring-champagne/30 shadow-glow">
-          {PERFIL.nome.charAt(0)}
+          {perfil.nome.charAt(0).toUpperCase()}
         </span>
         <div className="flex-1">
-          <h1 className="font-display text-2xl font-bold text-white">
-            {PERFIL.nome}
-          </h1>
-          <p className="text-sm text-white/50">{PERFIL.email}</p>
+          <h1 className="font-display text-2xl font-bold text-white">{perfil.nome}</h1>
+          <p className="text-sm text-white/50">{perfil.email}</p>
           <p className="mt-1 text-xs uppercase tracking-widest text-white/35">
-            Leitora desde {PERFIL.desde} · {PERFIL.lidos} livros lidos
+            Leitora desde {desde}
+            {progresso.length > 0 && ` · ${progresso.length} livros em leitura`}
           </p>
         </div>
         <button className="btn-ghost !py-2.5">
@@ -54,110 +64,113 @@ export default function ContaPage() {
         </button>
       </div>
 
-      {/* ---------- Plano atual ---------- */}
       <div className="mt-6 grid gap-6 md:grid-cols-2">
+        {/* Assinatura */}
         <div className="glass-strong rounded-2xl p-7 ring-1 ring-champagne/20">
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-2 text-champagne">
               <Crown size={18} />
               <span className="font-display text-lg font-bold">Acesso Total</span>
             </span>
-            <span className="rounded-full bg-blood-800/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-smoke">
-              Ativo
+            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest ${st.cls}`}>
+              {st.label}
             </span>
           </div>
           <div className="my-5 rule" />
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between">
               <dt className="text-white/50">Valor</dt>
-              <dd className="text-white">R$ 9,99/mês</dd>
+              <dd className="text-white">{brl(assinatura?.priceCents ?? 999)}/mês</dd>
             </div>
             <div className="flex justify-between">
               <dt className="text-white/50">Próxima cobrança</dt>
-              <dd className="text-white">12 de setembro de 2026</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-white/50">Forma de pagamento</dt>
-              <dd className="flex items-center gap-1.5 text-white">
-                <CreditCard size={14} className="text-white/40" /> •••• 4821
+              <dd className="text-white">
+                {assinatura?.currentPeriodEnd
+                  ? new Date(assinatura.currentPeriodEnd).toLocaleDateString("pt-BR")
+                  : "—"}
               </dd>
             </div>
           </dl>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/#planos" className="btn-primary !py-2.5 flex-1 justify-center">
-              Gerenciar assinatura
-            </Link>
-            <button className="btn-ghost !py-2.5">Cancelar</button>
+            {status === "active" ? (
+              <button className="btn-ghost !py-2.5 flex-1 justify-center">Cancelar assinatura</button>
+            ) : (
+              <Link href="/checkout?plano=mensal" className="btn-primary !py-2.5 flex-1 justify-center">
+                Ativar assinatura
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* ---------- Dados da conta ---------- */}
+        {/* Dados da conta */}
         <div className="glass rounded-2xl p-7">
-          <h2 className="font-display text-lg font-bold text-white">
-            Dados da conta
-          </h2>
+          <h2 className="font-display text-lg font-bold text-white">Dados da conta</h2>
           <div className="my-5 rule" />
           <div className="space-y-4">
-            <LinhaDado icon={UserRound} label="Nome" valor={PERFIL.nome} />
-            <LinhaDado icon={Mail} label="E-mail" valor={PERFIL.email} />
+            <LinhaDado icon={UserRound} label="Nome" valor={perfil.nome} />
+            <LinhaDado icon={Mail} label="E-mail" valor={perfil.email} />
             <LinhaDado
               icon={BookOpen}
-              label="Preferências"
-              valor="Máfia · Dark & Forbidden · Possessivo"
+              label="Tipo de conta"
+              valor={perfil.role === "admin" ? "Administrador" : "Assinante"}
             />
           </div>
-          <button className="btn-ghost mt-6 w-full justify-center !py-2.5">
-            Gerenciar preferências
-          </button>
+          {perfil.role === "admin" && (
+            <Link href="/admin" className="btn-ghost mt-6 w-full justify-center !py-2.5">
+              Abrir painel admin
+            </Link>
+          )}
         </div>
       </div>
 
-      {/* ---------- Continuar lendo ---------- */}
+      {/* Continuar lendo */}
       <section className="mt-10">
-        <h2 className="mb-5 font-display text-xl font-bold text-white">
-          Continuar lendo
-        </h2>
-        <div className="space-y-3">
-          {lendo.map((l, i) => {
-            const progresso = [72, 41, 88, 15][i];
-            return (
-              <Link
-                key={l.id}
-                href={`/plataforma/livro/${l.id}`}
-                className="group flex items-center gap-4 rounded-2xl border border-white/5 bg-ink-800/40 p-3 transition-colors hover:border-champagne/20"
-              >
-                <span
-                  className="grid h-14 w-10 shrink-0 place-items-center rounded-md text-[8px] font-bold uppercase text-white/70"
-                  style={{
-                    background: `linear-gradient(160deg, ${l.capa.para}, ${l.capa.de})`,
-                  }}
+        <h2 className="mb-5 font-display text-xl font-bold text-white">Continuar lendo</h2>
+        {progresso.length === 0 ? (
+          <div className="glass rounded-2xl p-8 text-center">
+            <p className="text-white/55">Você ainda não começou nenhuma leitura.</p>
+            <Link href="/plataforma" className="btn-primary mt-4 !py-2.5">
+              Explorar a biblioteca
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {progresso.map((p: any, i: number) => {
+              const l = p.books;
+              if (!l) return null;
+              return (
+                <Link
+                  key={i}
+                  href={`/plataforma/livro/${l.slug}`}
+                  className="group flex items-center gap-4 rounded-2xl border border-white/5 bg-ink-800/40 p-3 transition-colors hover:border-champagne/20"
                 >
-                  V
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-display text-base font-semibold text-white">
-                    {l.titulo}
-                  </p>
-                  <p className="truncate text-xs text-white/45">{l.autora}</p>
-                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-blood-600 to-champagne"
-                      style={{ width: `${progresso}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="hidden shrink-0 text-right sm:block">
-                  <span className="text-sm font-semibold text-champagne">
-                    {progresso}%
+                  <span
+                    className="grid h-14 w-10 shrink-0 place-items-center rounded-md text-[8px] font-bold uppercase text-white/70"
+                    style={{ background: `linear-gradient(160deg, ${l.capa_para}, ${l.capa_de})` }}
+                  >
+                    V
                   </span>
-                  <div className="mt-1">
-                    <Stars nota={l.nota} size={11} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-base font-semibold text-white">{l.titulo}</p>
+                    <p className="truncate text-xs text-white/45">{l.autora}</p>
+                    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-blood-600 to-champagne"
+                        style={{ width: `${p.percent}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+                  <div className="hidden shrink-0 text-right sm:block">
+                    <span className="text-sm font-semibold text-champagne">{p.percent}%</span>
+                    <div className="mt-1">
+                      <Stars nota={Number(l.nota)} size={11} />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
