@@ -1,20 +1,41 @@
 import Link from "next/link";
-import { Instagram, Music2, BookHeart, Mail } from "lucide-react";
+import { Instagram, Music2 } from "lucide-react";
 import Logo from "./Logo";
 
 const COLS = [
   {
     titulo: "O Clube",
-    links: ["Catálogo", "Como funciona", "Planos", "Lançamentos"],
+    links: [
+      { label: "Catálogo", href: "/#catalogo" },
+      { label: "Como funciona", href: "/#como-funciona" },
+      { label: "Planos", href: "/#planos" },
+      { label: "Lançamentos", href: "/lancamentos" },
+    ],
   },
   {
     titulo: "Ajuda",
-    links: ["Central de ajuda", "Como ler os PDFs", "Fale conosco", "Status"],
+    links: [
+      { label: "Central de ajuda", href: "/ajuda" },
+      { label: "Como ler os PDFs", href: "/como-ler" },
+      { label: "Fale conosco", href: "/contato" },
+      { label: "Status", href: "/status" },
+    ],
   },
   {
     titulo: "Legal",
-    links: ["Termos de uso", "Privacidade", "Conteúdo +18", "Reembolso"],
+    links: [
+      { label: "Termos de uso", href: "/termos" },
+      { label: "Privacidade", href: "/privacidade" },
+      { label: "Conteúdo +18", href: "/conteudo-adulto" },
+      { label: "Reembolso", href: "/reembolso" },
+    ],
   },
+];
+
+// Só Instagram e TikTok.
+const REDES = [
+  { Icon: Instagram, label: "Instagram", href: "https://instagram.com" },
+  { Icon: Music2, label: "TikTok", href: "https://tiktok.com" },
 ];
 
 export default function Footer() {
@@ -30,12 +51,14 @@ export default function Footer() {
               de dark romance todo mês, prontos para ler onde você estiver.
             </p>
             <div className="mt-5 flex items-center gap-3">
-              {[Instagram, Music2, BookHeart, Mail].map((Icon, i) => (
+              {REDES.map(({ Icon, label, href }) => (
                 <Link
-                  key={i}
-                  href="#"
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="grid h-9 w-9 place-items-center rounded-full ring-1 ring-white/10 text-white/60 transition-all hover:text-champagne hover:ring-champagne/40"
-                  aria-label="Rede social"
+                  aria-label={label}
                 >
                   <Icon size={16} />
                 </Link>
@@ -50,12 +73,12 @@ export default function Footer() {
               </h4>
               <ul className="space-y-2.5">
                 {col.links.map((l) => (
-                  <li key={l}>
+                  <li key={l.label}>
                     <Link
-                      href="#"
+                      href={l.href}
                       className="text-sm text-white/55 transition-colors hover:text-white"
                     >
-                      {l}
+                      {l.label}
                     </Link>
                   </li>
                 ))}
@@ -66,8 +89,8 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} Vício em Dark Romance. Protótipo de
-            demonstração — conteúdo fictício.
+            © {new Date().getFullYear()} Vício em Dark Romance. Todos os direitos
+            reservados.
           </p>
           <span className="inline-flex items-center gap-2 rounded-full border border-blood-700/40 bg-blood-900/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-smoke">
             Conteúdo adulto · +18
