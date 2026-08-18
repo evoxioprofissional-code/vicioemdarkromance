@@ -34,8 +34,8 @@ const COLS = [
 
 // Só Instagram e TikTok.
 const REDES = [
-  { Icon: Instagram, label: "Instagram", href: "https://instagram.com" },
-  { Icon: Music2, label: "TikTok", href: "https://tiktok.com" },
+  { Icon: Instagram, label: "Instagram", href: "https://www.instagram.com/vicio_em_dark_romance" },
+  { Icon: Music2, label: "TikTok", href: "https://www.tiktok.com/@vicio_em_dark_romance" },
 ];
 
 export default function Footer() {

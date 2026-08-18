@@ -27,23 +27,23 @@ export default function ContatoPage() {
           </span>
         </a>
 
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="glass group flex items-center gap-4 rounded-2xl p-5 transition-transform hover:-translate-y-1">
+        <a href="https://www.instagram.com/vicio_em_dark_romance" target="_blank" rel="noopener noreferrer" className="glass group flex items-center gap-4 rounded-2xl p-5 transition-transform hover:-translate-y-1">
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-blood-800/40 text-champagne ring-1 ring-champagne/20">
             <Instagram size={20} />
           </span>
           <span>
             <span className="block font-display text-base font-semibold text-white">Instagram</span>
-            <span className="block text-sm text-white/50">Chame no direct</span>
+            <span className="block text-sm text-white/50">@vicio_em_dark_romance</span>
           </span>
         </a>
 
-        <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="glass group flex items-center gap-4 rounded-2xl p-5 transition-transform hover:-translate-y-1">
+        <a href="https://www.tiktok.com/@vicio_em_dark_romance" target="_blank" rel="noopener noreferrer" className="glass group flex items-center gap-4 rounded-2xl p-5 transition-transform hover:-translate-y-1">
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-blood-800/40 text-champagne ring-1 ring-champagne/20">
             <Music2 size={20} />
           </span>
           <span>
             <span className="block font-display text-base font-semibold text-white">TikTok</span>
-            <span className="block text-sm text-white/50">@vicioemdark</span>
+            <span className="block text-sm text-white/50">@vicio_em_dark_romance</span>
           </span>
         </a>
 
