@@ -4,8 +4,7 @@ import { DocHeader } from "@/components/PageChrome";
 
 export const metadata = { title: "Fale conosco — Vício em Dark Romance" };
 
-// Ajuste estes contatos com os canais reais do clube.
-const EMAIL = "contato@vicioemdarkromance.com";
+const EMAIL = "suporte@vicioemdarkromance.com.br";
 
 export default function ContatoPage() {
   return (
