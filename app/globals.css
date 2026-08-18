@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  --ink: #0a0607;
+  --ink-800: #120608;
+  --blood-800: #7a0f1c;
+  --blood-700: #a11d2e;
+  --blood-600: #c0303f;
+  --champagne: #d9b26a;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink text-white/85 font-body antialiased;
+    background-color: var(--ink);
+    /* Camadas: brilho vinho no topo + escurecimento nas bordas */
+    background-image:
+      radial-gradient(75% 55% at 50% -10%, rgba(161, 29, 46, 0.28) 0%, rgba(10, 6, 7, 0) 60%),
+      radial-gradient(50% 40% at 85% 10%, rgba(122, 15, 28, 0.18) 0%, rgba(10, 6, 7, 0) 55%),
+      linear-gradient(180deg, #0a0607 0%, #120608 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: rgba(193, 48, 63, 0.4);
+    color: #fff;
+  }
+
+  /* Scrollbar sutil no tema */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0607;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #7a0f1c, #3a0810);
+    border-radius: 999px;
+    border: 2px solid #0a0607;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #a11d2e, #5c0a14);
+  }
+}
+
+@layer components {
+  /* Textura de grão/ruído sobre toda a tela para tirar o "chapado" */
+  .grain::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Card de vidro discreto */
+  .glass {
+    background: linear-gradient(
+      160deg,
+      rgba(33, 16, 19, 0.72) 0%,
+      rgba(18, 6, 8, 0.55) 100%
+    );
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(217, 178, 106, 0.1);
+  }
+
+  .glass-strong {
+    background: linear-gradient(
+      160deg,
+      rgba(41, 18, 22, 0.9) 0%,
+      rgba(18, 6, 8, 0.82) 100%
+    );
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(217, 178, 106, 0.14);
+  }
+
+  /* Título com leve gradiente champanhe -> branco */
+  .text-gilded {
+    background: linear-gradient(180deg, #f6ecd6 0%, #d9b26a 60%, #b8914c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-bloodied {
+    background: linear-gradient(180deg, #ffd9db 0%, #d94452 55%, #7a0f1c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Borda fina com brilho (usada em botões/cards de destaque) */
+  .ring-gilded {
+    box-shadow: inset 0 0 0 1px rgba(217, 178, 106, 0.35);
+  }
+
+  /* Botão primário premium */
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-wide text-white transition-all duration-300;
+    background: linear-gradient(180deg, #c0303f 0%, #7a0f1c 100%);
+    box-shadow:
+      0 10px 30px -10px rgba(193, 48, 63, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      0 16px 40px -12px rgba(193, 48, 63, 0.85),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .btn-ghost {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold tracking-wide text-white/90 transition-all duration-300;
+    border: 1px solid rgba(217, 178, 106, 0.28);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .btn-ghost:hover {
+    border-color: rgba(217, 178, 106, 0.6);
+    color: #fff;
+    box-shadow: 0 0 32px -12px rgba(217, 178, 106, 0.5);
+  }
+
+  /* Etiqueta/eyebrow */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-champagne/80;
+  }
+
+  /* Divisor decorativo */
+  .rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(217, 178, 106, 0.35),
+      transparent
+    );
+  }
+
+  /* Esconde a barra de rolagem em prateleiras horizontais */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
