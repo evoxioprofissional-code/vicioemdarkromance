@@ -1,6 +1,6 @@
-import { UserX, AlertTriangle, RotateCcw, TrendingDown } from "lucide-react";
+import { UserX, AlertTriangle, TrendingDown } from "lucide-react";
 import { StatCard, AdminHeading } from "@/components/admin/UI";
-import ClientesTable from "@/components/admin/ClientesTable";
+import RecuperacaoWhatsApp from "@/components/admin/RecuperacaoWhatsApp";
 import { getNaoRenovaram, getDashboard } from "@/lib/queries/admin";
 
 export default async function RenovacoesPage() {
@@ -11,15 +11,8 @@ export default async function RenovacoesPage() {
   return (
     <div>
       <AdminHeading
-        titulo="Clientes que não renovaram"
-        sub="Cancelamentos e falhas de cobrança — oportunidades de recuperação"
-        acao={
-          naoRenovaram.length > 0 ? (
-            <button className="btn-primary !py-2.5 !text-[13px]">
-              <RotateCcw size={15} /> Enviar campanha de retorno
-            </button>
-          ) : undefined
-        }
+        titulo="Recuperação de clientes"
+        sub="Cancelamentos e falhas de cobrança — traga suas leitoras de volta pelo WhatsApp"
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -30,13 +23,7 @@ export default async function RenovacoesPage() {
       </div>
 
       <div className="mt-6">
-        {naoRenovaram.length > 0 ? (
-          <ClientesTable clientes={naoRenovaram} filtros={false} mostrarMotivo />
-        ) : (
-          <div className="glass rounded-2xl p-10 text-center text-sm text-white/45">
-            🎉 Nenhum cancelamento ou inadimplência no momento.
-          </div>
-        )}
+        <RecuperacaoWhatsApp clientes={naoRenovaram} />
       </div>
     </div>
   );

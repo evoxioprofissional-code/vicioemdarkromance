@@ -21,6 +21,7 @@ export async function cadastrar(formData: FormData) {
   const nome = String(formData.get("nome") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const telefone = String(formData.get("telefone") ?? "").trim();
 
   if (password.length < 6) {
     redirect("/cadastrar?erro=" + encodeURIComponent("A senha precisa ter ao menos 6 caracteres."));
@@ -30,7 +31,7 @@ export async function cadastrar(formData: FormData) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { nome } },
+    options: { data: { nome, telefone } },
   });
 
   if (error) {

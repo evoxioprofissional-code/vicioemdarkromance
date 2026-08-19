@@ -181,6 +181,7 @@ function mapCliente(r: any): Cliente {
     id: r.id,
     nome: r.nome || (r.email ? r.email.split("@")[0] : "—"),
     email: r.email ?? "",
+    telefone: r.telefone ?? null,
     status: (r.status ?? "inactive") as StatusAssinatura,
     entrouEm: fmtData(r.entrou_em),
     ultimaAtividade: fmtData(r.ultima_atividade),

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Lock, Mail, User, AlertCircle } from "lucide-react";
+import { Lock, Mail, User, Phone, AlertCircle } from "lucide-react";
 import Logo from "@/components/Logo";
 import { cadastrar } from "@/lib/auth/actions";
 
@@ -56,6 +56,20 @@ export default function CadastrarPage({
                   type="email"
                   required
                   placeholder="voce@email.com"
+                  className="w-full rounded-xl border border-white/10 bg-ink-800/60 py-3 pl-9 pr-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-champagne/40"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">
+                WhatsApp <span className="text-white/30">(opcional)</span>
+              </label>
+              <div className="relative">
+                <Phone size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+                <input
+                  name="telefone"
+                  type="tel"
+                  placeholder="(11) 90000-0000"
                   className="w-full rounded-xl border border-white/10 bg-ink-800/60 py-3 pl-9 pr-3 text-sm text-white placeholder:text-white/25 outline-none focus:border-champagne/40"
                 />
               </div>
