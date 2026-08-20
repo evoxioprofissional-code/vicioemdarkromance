@@ -6,24 +6,19 @@ import {
   ArrowLeft,
   CreditCard,
   CheckCircle2,
+  QrCode,
+  AlertCircle,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { getPlano } from "@/lib/queries/plans";
-import { finalizarAssinatura } from "@/lib/actions/checkout";
+import { pagarComPix } from "@/lib/actions/pagamento";
 import type { Plano } from "@/lib/types";
-
-// ============================================================
-//  CHECKOUT
-//  O formulário de cartão é visual (gateway ainda não conectado).
-//  O botão "Finalizar" ativa a assinatura do usuário logado.
-// ============================================================
 
 function Resumo({ plano }: { plano: Plano }) {
   return (
     <aside className="glass-strong h-fit rounded-2xl p-7 lg:sticky lg:top-8">
-      <h2 className="font-display text-xl font-bold text-white">Resumo do plano</h2>
+      <h2 className="font-display text-xl font-bold text-white">Resumo</h2>
       <div className="my-5 rule" />
-
       <div className="flex items-start justify-between">
         <div>
           <p className="font-display text-lg font-semibold text-champagne">
@@ -49,19 +44,14 @@ function Resumo({ plano }: { plano: Plano }) {
       </ul>
 
       <div className="my-5 rule" />
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-white/55">{plano.cobranca}</span>
-      </div>
-      <div className="mt-2 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <span className="font-semibold text-white">Total hoje</span>
         <span className="font-display text-xl font-bold text-gilded">
           {plano.precoMes}
         </span>
       </div>
-
       <p className="mt-5 flex items-center gap-2 text-[11px] text-white/40">
-        <ShieldCheck size={14} className="text-champagne" /> Renovação automática ·
-        cancele quando quiser
+        <ShieldCheck size={14} className="text-champagne" /> Cancele quando quiser
       </p>
     </aside>
   );
@@ -70,7 +60,7 @@ function Resumo({ plano }: { plano: Plano }) {
 export default async function CheckoutPage({
   searchParams,
 }: {
-  searchParams: { plano?: string; pendente?: string };
+  searchParams: { plano?: string; erro?: string };
 }) {
   const plano = await getPlano(searchParams.plano);
   if (!plano) return notFound();
@@ -85,7 +75,7 @@ export default async function CheckoutPage({
           href="/#planos"
           className="inline-flex items-center gap-1.5 text-sm text-white/55 transition-colors hover:text-white"
         >
-          <ArrowLeft size={15} /> Trocar plano
+          <ArrowLeft size={15} /> Voltar
         </Link>
       </header>
 
@@ -95,132 +85,74 @@ export default async function CheckoutPage({
             <Lock size={13} /> Pagamento seguro
           </span>
           <h1 className="mt-3 font-display text-3xl font-bold text-white sm:text-4xl">
-            Falta um passo para o seu vício
+            Escolha como pagar
           </h1>
           <p className="mt-2 text-white/55">
-            Preencha os dados para assinar e liberar a biblioteca completa.
+            Assine o Acesso Total e libere a biblioteca completa na hora.
           </p>
         </div>
 
-        {searchParams.pendente && (
-          <div className="mb-8 rounded-2xl border border-champagne/25 bg-blood-900/20 p-5">
-            <p className="font-display text-lg font-semibold text-champagne">
-              Pagamento em breve
-            </p>
-            <p className="mt-1 text-sm text-white/60">
-              Estamos conectando o meio de pagamento (Pix e cartão via
-              InfinitePay). Assim que estiver ativo, sua assinatura é liberada na
-              hora após o pagamento. Obrigada pela paciência. 🖤
-            </p>
+        {searchParams.erro && (
+          <div className="mb-8 flex items-center gap-2 rounded-lg border border-blood-600/40 bg-blood-900/30 px-3 py-2.5 text-sm text-smoke">
+            <AlertCircle size={15} /> {searchParams.erro}
           </div>
         )}
 
         <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
-          {/* -------- Formulário -------- */}
-          {/* Campos de cartão são visuais (gateway ainda não conectado);
-              o submit ativa a assinatura do usuário logado. */}
-          <form action={finalizarAssinatura} className="glass rounded-2xl p-7 sm:p-8">
-            {/* Dados da conta */}
-            <h3 className="mb-4 font-display text-lg font-semibold text-white">
-              Seus dados
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Campo label="Nome completo" placeholder="Como no cartão" span2 />
-              <Campo label="E-mail" placeholder="voce@email.com" type="email" span2 />
-            </div>
-
-            <div className="my-7 rule" />
-
-            {/* Pagamento */}
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-lg font-semibold text-white">
-                Cartão de crédito
-              </h3>
-              <div className="flex items-center gap-1.5 text-white/30">
-                <CreditCard size={18} />
-                <span className="text-[10px] uppercase tracking-widest">
-                  Visa · Master · Elo
+          <div className="space-y-4">
+            {/* Pix — InfinitePay */}
+            <div className="glass rounded-2xl p-6">
+              <div className="flex items-start gap-4">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20">
+                  <QrCode size={22} />
+                </span>
+                <div className="flex-1">
+                  <h3 className="font-display text-lg font-bold text-white">Pix</h3>
+                  <p className="mt-0.5 text-sm text-white/55">
+                    Aprovação na hora. Você paga, o acesso libera na sequência.
+                  </p>
+                </div>
+                <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                  Recomendado
                 </span>
               </div>
+              <form action={pagarComPix} className="mt-5">
+                <button type="submit" className="btn-primary w-full justify-center !py-3.5">
+                  <QrCode size={16} /> Pagar {plano.precoMes} com Pix
+                </button>
+              </form>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Campo
-                label="Número do cartão"
-                placeholder="0000 0000 0000 0000"
-                icon={<CreditCard size={15} />}
-                span2
-              />
-              <Campo label="Validade" placeholder="MM/AA" />
-              <Campo label="CVV" placeholder="123" />
-              <Campo label="Nome impresso no cartão" placeholder="NOME SOBRENOME" span2 />
-              <Campo label="CPF do titular" placeholder="000.000.000-00" span2 />
+            {/* Cartão — Mercado Pago (em breve) */}
+            <div className="glass rounded-2xl p-6 opacity-70">
+              <div className="flex items-start gap-4">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5 text-white/50">
+                  <CreditCard size={22} />
+                </span>
+                <div className="flex-1">
+                  <h3 className="font-display text-lg font-bold text-white">Cartão de crédito</h3>
+                  <p className="mt-0.5 text-sm text-white/55">
+                    Renovação automática todo mês, sem precisar refazer nada.
+                  </p>
+                </div>
+                <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
+                  Em breve
+                </span>
+              </div>
+              <button disabled className="btn-ghost mt-5 w-full cursor-default justify-center !py-3.5 opacity-60">
+                Cartão chegando em breve
+              </button>
             </div>
 
-            <label className="mt-6 flex items-start gap-3 text-sm text-white/55">
-              <input
-                type="checkbox"
-                className="mt-0.5 h-4 w-4 rounded border-white/20 bg-transparent accent-blood-600"
-              />
-              <span>
-                Confirmo ter mais de 18 anos e concordo com os termos de uso e a
-                política de privacidade.
-              </span>
-            </label>
-
-            <button
-              type="submit"
-              className="btn-primary mt-7 w-full justify-center !py-4 text-base"
-            >
-              <Lock size={16} /> Finalizar assinatura
-            </button>
-
-            <p className="mt-4 flex items-center justify-center gap-2 text-[11px] text-white/35">
+            <p className="flex items-center justify-center gap-2 pt-1 text-[11px] text-white/35">
               <ShieldCheck size={14} className="text-champagne" />
-              Ambiente criptografado · seus dados estão protegidos
+              Ambiente seguro · você confirma o pagamento no app do seu banco
             </p>
-          </form>
+          </div>
 
           <Resumo plano={plano} />
         </div>
       </div>
     </main>
-  );
-}
-
-/** Campo de formulário estilizado (sem lógica/validação). */
-function Campo({
-  label,
-  placeholder,
-  type = "text",
-  icon,
-  span2 = false,
-}: {
-  label: string;
-  placeholder: string;
-  type?: string;
-  icon?: React.ReactNode;
-  span2?: boolean;
-}) {
-  return (
-    <div className={span2 ? "sm:col-span-2" : ""}>
-      <label className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-white/50">
-        {label}
-      </label>
-      <div className="relative">
-        {icon && (
-          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/30">
-            {icon}
-          </span>
-        )}
-        <input
-          type={type}
-          placeholder={placeholder}
-          className={`w-full rounded-xl border border-white/10 bg-ink-800/60 py-3 text-sm text-white placeholder:text-white/25 outline-none transition-colors focus:border-champagne/40 focus:ring-1 focus:ring-champagne/20 ${
-            icon ? "pl-9 pr-3" : "px-3"
-          }`}
-        />
-      </div>
-    </div>
   );
 }
