@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { Search, Pencil, Trash2, FileText, Clock } from "lucide-react";
 import BookCover from "@/components/BookCover";
 import { diasRestantesLancamento, type Livro } from "@/lib/types";
+import { excluirLivro } from "@/lib/actions/livros";
 
 /**
  * Gestão do catálogo. O toggle "Novo lançamento" mostra os dias restantes na
@@ -100,12 +102,30 @@ export default function CatalogoManager({ livros }: { livros: Livro[] }) {
               </label>
 
               <div className="flex gap-1">
-                <button className="grid h-9 w-9 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-champagne" aria-label="Editar">
+                <Link
+                  href={`/admin/catalogo/${l.id}/editar`}
+                  className="grid h-9 w-9 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-champagne"
+                  aria-label="Editar"
+                >
                   <Pencil size={15} />
-                </button>
-                <button className="grid h-9 w-9 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-blood-500" aria-label="Excluir">
-                  <Trash2 size={15} />
-                </button>
+                </Link>
+                <form
+                  action={excluirLivro}
+                  onSubmit={(e) => {
+                    if (!confirm(`Excluir "${l.titulo}"? Essa ação não pode ser desfeita.`)) {
+                      e.preventDefault();
+                    }
+                  }}
+                >
+                  <input type="hidden" name="slug" value={l.id} />
+                  <button
+                    type="submit"
+                    className="grid h-9 w-9 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-blood-500"
+                    aria-label="Excluir"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </form>
               </div>
             </li>
           );

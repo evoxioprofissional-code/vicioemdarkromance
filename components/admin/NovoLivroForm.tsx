@@ -5,7 +5,7 @@ import Link from "next/link";
 import { UploadCloud, FileText, Check, Clock, AlertCircle } from "lucide-react";
 import BookCover from "@/components/BookCover";
 import { categorias, type Categoria, type Livro } from "@/lib/types";
-import { criarLivro } from "@/lib/actions/livros";
+import { criarLivro, atualizarLivro } from "@/lib/actions/livros";
 
 const PALETAS = [
   { de: "#3a0810", para: "#c0303f" },
@@ -16,15 +16,24 @@ const PALETAS = [
   { de: "#12060a", para: "#d94452" },
 ];
 
-export default function NovoLivroForm({ erro }: { erro?: string }) {
-  const [titulo, setTitulo] = useState("");
-  const [autora, setAutora] = useState("");
-  const [selo, setSelo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [tags, setTags] = useState<Categoria[]>([]);
-  const [paleta, setPaleta] = useState(0);
-  const [pdf, setPdf] = useState<string | null>(null);
-  const [novoLancamento, setNovoLancamento] = useState(true);
+export default function NovoLivroForm({
+  erro,
+  livro,
+}: {
+  erro?: string;
+  livro?: Livro;
+}) {
+  const editando = !!livro;
+
+  const [titulo, setTitulo] = useState(livro?.titulo ?? "");
+  const [autora, setAutora] = useState(livro?.autora ?? "");
+  const [selo, setSelo] = useState(livro?.capa.selo ?? "");
+  const [descricao, setDescricao] = useState(livro?.sinopse ?? "");
+  const [tags, setTags] = useState<Categoria[]>(livro?.tags ?? []);
+  const [capaDe, setCapaDe] = useState(livro?.capa.de ?? PALETAS[1].de);
+  const [capaPara, setCapaPara] = useState(livro?.capa.para ?? PALETAS[1].para);
+  const [pdf, setPdf] = useState<string | null>(livro?.temPdf ? "PDF atual" : null);
+  const [novoLancamento, setNovoLancamento] = useState(livro?.novo ?? true);
 
   const preview: Livro = {
     id: "preview",
@@ -35,18 +44,18 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
     paginas: 0,
     ano: 2026,
     nota: 5,
-    capa: { ...PALETAS[paleta], selo: selo || "Coleção" },
+    capa: { de: capaDe, para: capaPara, selo: selo || "Coleção" },
   };
 
   const toggleTag = (t: Categoria) =>
     setTags((s) => (s.includes(t) ? s.filter((x) => x !== t) : [...s, t]));
 
   return (
-    <form action={criarLivro} className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-      {/* campos ocultos que carregam o estado ao enviar */}
+    <form action={editando ? atualizarLivro : criarLivro} className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+      {editando && <input type="hidden" name="slug" value={livro!.id} />}
       <input type="hidden" name="tags" value={tags.join(",")} />
-      <input type="hidden" name="capa_de" value={PALETAS[paleta].de} />
-      <input type="hidden" name="capa_para" value={PALETAS[paleta].para} />
+      <input type="hidden" name="capa_de" value={capaDe} />
+      <input type="hidden" name="capa_para" value={capaPara} />
       <input type="hidden" name="novo" value={novoLancamento ? "1" : ""} />
 
       <div className="space-y-6">
@@ -58,9 +67,13 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
 
         {/* Upload PDF */}
         <div className="glass rounded-2xl p-6">
-          <h2 className="mb-1 font-display text-lg font-bold text-white">Arquivo do livro (PDF)</h2>
+          <h2 className="mb-1 font-display text-lg font-bold text-white">
+            Arquivo do livro (PDF){editando && " — opcional"}
+          </h2>
           <p className="mb-4 text-xs text-white/45">
-            O PDF fica num bucket privado e só é liberado para assinantes ativos.
+            {editando
+              ? "Envie um PDF só se quiser substituir o atual."
+              : "O PDF fica num bucket privado e só é liberado para assinantes ativos."}
           </p>
 
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-ink-800/40 px-6 py-9 text-center transition-colors hover:border-champagne/40">
@@ -70,7 +83,9 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
                   <FileText size={20} />
                 </span>
                 <span className="text-sm font-medium text-white">{pdf}</span>
-                <span className="text-xs text-champagne">Trocar arquivo</span>
+                <span className="text-xs text-champagne">
+                  {editando ? "Trocar PDF" : "Trocar arquivo"}
+                </span>
               </>
             ) : (
               <>
@@ -88,7 +103,7 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
               name="pdf"
               accept="application/pdf"
               className="hidden"
-              onChange={(e) => setPdf(e.target.files?.[0]?.name ?? null)}
+              onChange={(e) => setPdf(e.target.files?.[0]?.name ?? (livro?.temPdf ? "PDF atual" : null))}
             />
           </label>
         </div>
@@ -105,7 +120,7 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
               <input name="autora" required value={autora} onChange={(e) => setAutora(e.target.value)} placeholder="Ex.: H. D. Carlton" className={inputCls} />
             </Campo>
             <Campo label="Páginas">
-              <input name="paginas" type="number" min={0} placeholder="Ex.: 320" className={inputCls} />
+              <input name="paginas" type="number" min={0} defaultValue={livro?.paginas || ""} placeholder="Ex.: 320" className={inputCls} />
             </Campo>
             <Campo label="Coleção / volume (selo da capa)" span2>
               <input name="selo" value={selo} onChange={(e) => setSelo(e.target.value)} placeholder="Ex.: Gato e Rato · Vol. I" className={inputCls} />
@@ -163,7 +178,9 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <button type="submit" className="btn-primary !py-3.5">Publicar livro</button>
+          <button type="submit" className="btn-primary !py-3.5">
+            {editando ? "Salvar alterações" : "Publicar livro"}
+          </button>
           <Link href="/admin/catalogo" className="btn-ghost !py-3.5">Cancelar</Link>
         </div>
       </div>
@@ -183,9 +200,9 @@ export default function NovoLivroForm({ erro }: { erro?: string }) {
             <button
               key={i}
               type="button"
-              onClick={() => setPaleta(i)}
+              onClick={() => { setCapaDe(p.de); setCapaPara(p.para); }}
               aria-label={`Paleta ${i + 1}`}
-              className={`h-9 rounded-lg ring-2 transition-all ${paleta === i ? "ring-champagne" : "ring-transparent hover:ring-white/20"}`}
+              className={`h-9 rounded-lg ring-2 transition-all ${capaDe === p.de && capaPara === p.para ? "ring-champagne" : "ring-transparent hover:ring-white/20"}`}
               style={{ background: `linear-gradient(135deg, ${p.de}, ${p.para})` }}
             />
           ))}

@@ -1,11 +1,21 @@
 import Link from "next/link";
-import { Plus, BookCopy, Clock, Star } from "lucide-react";
+import { Plus, BookCopy, Clock, Star, CheckCircle2, AlertCircle } from "lucide-react";
 import { StatCard, AdminHeading } from "@/components/admin/UI";
 import CatalogoManager from "@/components/admin/CatalogoManager";
 import { getCatalogo } from "@/lib/queries/books";
 import { emLancamento } from "@/lib/types";
 
-export default async function CatalogoPage() {
+const OK_MSG: Record<string, string> = {
+  "1": "Livro publicado com sucesso.",
+  editado: "Livro atualizado.",
+  removido: "Livro excluído.",
+};
+
+export default async function CatalogoPage({
+  searchParams,
+}: {
+  searchParams: { ok?: string; erro?: string };
+}) {
   const livros = await getCatalogo();
   const emVitrine = livros.filter((l) => emLancamento(l)).length;
   const notaMedia = livros.length
@@ -23,6 +33,17 @@ export default async function CatalogoPage() {
           </Link>
         }
       />
+
+      {searchParams.ok && OK_MSG[searchParams.ok] && (
+        <div className="mb-6 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2.5 text-sm text-emerald-300">
+          <CheckCircle2 size={15} /> {OK_MSG[searchParams.ok]}
+        </div>
+      )}
+      {searchParams.erro && (
+        <div className="mb-6 flex items-center gap-2 rounded-lg border border-blood-600/40 bg-blood-900/30 px-3 py-2.5 text-sm text-smoke">
+          <AlertCircle size={15} /> {searchParams.erro}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Títulos no acervo" valor={String(livros.length)} icon={<BookCopy size={18} />} destaque />

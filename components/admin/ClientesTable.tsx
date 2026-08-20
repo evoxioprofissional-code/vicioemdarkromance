@@ -1,9 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, Mail, MoreHorizontal } from "lucide-react";
+import { Search, Mail, MessageCircle } from "lucide-react";
 import type { Cliente, StatusAssinatura } from "@/lib/types";
 import { StatusBadge } from "./UI";
+
+// Normaliza telefone para o formato do wa.me (dígitos + DDI 55).
+function zap(tel: string): string {
+  let d = tel.replace(/\D/g, "");
+  if (d.length <= 11) d = "55" + d;
+  return d;
+}
 
 type Filtro = "todos" | StatusAssinatura;
 
@@ -118,12 +125,32 @@ export default function ClientesTable({
                 </td>
                 <td className="px-5 py-3.5 text-right">
                   <div className="inline-flex gap-1">
-                    <button className="grid h-8 w-8 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-champagne" aria-label="Enviar e-mail">
-                      <Mail size={15} />
-                    </button>
-                    <button className="grid h-8 w-8 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-white" aria-label="Mais">
-                      <MoreHorizontal size={15} />
-                    </button>
+                    {c.email && (
+                      <a
+                        href={`mailto:${c.email}`}
+                        className="grid h-8 w-8 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-champagne"
+                        aria-label={`Enviar e-mail para ${c.nome}`}
+                        title="Enviar e-mail"
+                      >
+                        <Mail size={15} />
+                      </a>
+                    )}
+                    {c.telefone ? (
+                      <a
+                        href={`https://wa.me/${zap(c.telefone)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="grid h-8 w-8 place-items-center rounded-lg text-white/45 hover:bg-white/5 hover:text-emerald-400"
+                        aria-label={`WhatsApp de ${c.nome}`}
+                        title="Abrir no WhatsApp"
+                      >
+                        <MessageCircle size={15} />
+                      </a>
+                    ) : (
+                      <span className="grid h-8 w-8 place-items-center text-white/15" title="Sem WhatsApp">
+                        <MessageCircle size={15} />
+                      </span>
+                    )}
                   </div>
                 </td>
               </tr>

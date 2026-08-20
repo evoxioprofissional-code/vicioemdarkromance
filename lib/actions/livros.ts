@@ -70,3 +70,85 @@ export async function criarLivro(formData: FormData) {
   revalidatePath("/");
   redirect("/admin/catalogo?ok=1");
 }
+
+function revalidarTudo() {
+  revalidatePath("/admin/catalogo");
+  revalidatePath("/plataforma");
+  revalidatePath("/");
+}
+
+// Atualiza um livro existente (RLS: só admin).
+export async function atualizarLivro(formData: FormData) {
+  const slug = String(formData.get("slug") ?? "");
+  const titulo = String(formData.get("titulo") ?? "").trim();
+  const autora = String(formData.get("autora") ?? "").trim();
+  if (!slug || !titulo || !autora) {
+    redirect("/admin/catalogo?erro=" + encodeURIComponent("Dados inválidos."));
+  }
+
+  const selo = String(formData.get("selo") ?? "").trim();
+  const sinopse = String(formData.get("sinopse") ?? "").trim();
+  const capa_de = String(formData.get("capa_de") ?? "#2a0510");
+  const capa_para = String(formData.get("capa_para") ?? "#a11d2e");
+  const paginas = Number(formData.get("paginas") ?? 0) || 0;
+  const tagsRaw = String(formData.get("tags") ?? "");
+  const tags = tagsRaw ? tagsRaw.split(",").filter(Boolean) : [];
+  const novo = String(formData.get("novo") ?? "") === "1";
+
+  const supabase = await createClient();
+
+  const updates: Record<string, unknown> = {
+    titulo,
+    autora,
+    selo: selo || null,
+    sinopse: sinopse || null,
+    paginas,
+    tags,
+    capa_de,
+    capa_para,
+    novo,
+    lancado_em: novo ? new Date().toISOString().slice(0, 10) : null,
+  };
+
+  // Troca do PDF (opcional).
+  const pdf = formData.get("pdf") as File | null;
+  if (pdf && pdf.size > 0) {
+    const path = `${slug}.pdf`;
+    const { error } = await supabase.storage
+      .from("pdfs")
+      .upload(path, pdf, { upsert: true, contentType: "application/pdf" });
+    if (!error) updates.pdf_path = path;
+  }
+
+  const { error } = await supabase.from("books").update(updates).eq("slug", slug);
+  if (error) {
+    redirect(`/admin/catalogo/${slug}/editar?erro=` + encodeURIComponent(error.message));
+  }
+
+  revalidarTudo();
+  redirect("/admin/catalogo?ok=editado");
+}
+
+// Exclui um livro (RLS: só admin). Remove também os arquivos do storage.
+export async function excluirLivro(formData: FormData) {
+  const slug = String(formData.get("slug") ?? "");
+  if (!slug) return;
+
+  const supabase = await createClient();
+  const { data: book } = await supabase
+    .from("books")
+    .select("pdf_path, cover_path")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  const { error } = await supabase.from("books").delete().eq("slug", slug);
+  if (error) {
+    redirect("/admin/catalogo?erro=" + encodeURIComponent(error.message));
+  }
+
+  if (book?.pdf_path) await supabase.storage.from("pdfs").remove([book.pdf_path]);
+  if (book?.cover_path) await supabase.storage.from("covers").remove([book.cover_path]);
+
+  revalidarTudo();
+  redirect("/admin/catalogo?ok=removido");
+}
