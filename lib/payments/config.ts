@@ -2,7 +2,7 @@
 // for válido (ASCII), senão cai num valor padrão limpo — evita quebrar caso a
 // variável seja colada corrompida no ambiente.
 
-const FALLBACK_SITE = "https://vicioemdarkromance.vercel.app";
+const FALLBACK_SITE = "https://vicioemdarkromance.com.br";
 const FALLBACK_HANDLE = "vcbrilhante";
 const FALLBACK_SECRET =
   "vdr_whk_7b87bcb2a323a8d530d6058978b88815e8023b01575aa9e6";
