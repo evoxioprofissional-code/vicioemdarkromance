@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { UploadCloud, FileText, Check, Clock, AlertCircle, Image as ImageIcon } from "lucide-react";
+import { UploadCloud, FileText, Check, Clock, AlertCircle, Image as ImageIcon, Loader2 } from "lucide-react";
 import BookCover from "@/components/BookCover";
 import { categorias, type Categoria, type Livro } from "@/lib/types";
 import { criarLivro, atualizarLivro } from "@/lib/actions/livros";
+import { createClient } from "@/lib/supabase/client";
 
 const PALETAS = [
   { de: "#3a0810", para: "#c0303f" },
@@ -15,6 +16,19 @@ const PALETAS = [
   { de: "#0a0810", para: "#8a2f6a" },
   { de: "#12060a", para: "#d94452" },
 ];
+
+function slugify(s: string): string {
+  return (
+    s
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/&/g, "e")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 50) || "livro"
+  );
+}
 
 export default function NovoLivroForm({
   erro,
@@ -29,13 +43,21 @@ export default function NovoLivroForm({
   const [autora, setAutora] = useState(livro?.autora ?? "");
   const [selo, setSelo] = useState(livro?.capa.selo ?? "");
   const [descricao, setDescricao] = useState(livro?.sinopse ?? "");
+  const [paginas, setPaginas] = useState(livro?.paginas ? String(livro.paginas) : "");
   const [tags, setTags] = useState<Categoria[]>(livro?.tags ?? []);
   const [capaDe, setCapaDe] = useState(livro?.capa.de ?? PALETAS[1].de);
   const [capaPara, setCapaPara] = useState(livro?.capa.para ?? PALETAS[1].para);
-  const [pdf, setPdf] = useState<string | null>(livro?.temPdf ? "PDF atual" : null);
   const [novoLancamento, setNovoLancamento] = useState(livro?.novo ?? true);
+
+  // Arquivos escolhidos (enviados direto pro storage no submit).
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfNome, setPdfNome] = useState<string | null>(livro?.temPdf ? "PDF atual" : null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(livro?.coverUrl ?? null);
   const [removerCapa, setRemoverCapa] = useState(false);
+
+  const [enviando, setEnviando] = useState(false);
+  const [erroLocal, setErroLocal] = useState<string | null>(null);
 
   const preview: Livro = {
     id: "preview",
@@ -53,18 +75,71 @@ export default function NovoLivroForm({
   const toggleTag = (t: Categoria) =>
     setTags((s) => (s.includes(t) ? s.filter((x) => x !== t) : [...s, t]));
 
-  return (
-    <form action={editando ? atualizarLivro : criarLivro} className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-      {editando && <input type="hidden" name="slug" value={livro!.id} />}
-      <input type="hidden" name="tags" value={tags.join(",")} />
-      <input type="hidden" name="capa_de" value={capaDe} />
-      <input type="hidden" name="capa_para" value={capaPara} />
-      <input type="hidden" name="novo" value={novoLancamento ? "1" : ""} />
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErroLocal(null);
+    if (!titulo.trim() || !autora.trim()) {
+      setErroLocal("Título e autora são obrigatórios.");
+      return;
+    }
 
+    setEnviando(true);
+    try {
+      const supabase = createClient();
+      const base = slugify(titulo);
+      const stamp = Date.now();
+
+      let pdf_path = "";
+      if (pdfFile) {
+        const path = `${base}-${stamp}.pdf`;
+        const { error } = await supabase.storage
+          .from("pdfs")
+          .upload(path, pdfFile, { upsert: true, contentType: "application/pdf" });
+        if (error) throw new Error("Falha ao enviar o PDF: " + error.message);
+        pdf_path = path;
+      }
+
+      let cover_path = "";
+      if (coverFile) {
+        const ext = (coverFile.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+        const path = `${base}-cover-${stamp}.${ext}`;
+        const { error } = await supabase.storage
+          .from("covers")
+          .upload(path, coverFile, { upsert: true, contentType: coverFile.type || undefined });
+        if (error) throw new Error("Falha ao enviar a capa: " + error.message);
+        cover_path = path;
+      }
+
+      const fd = new FormData();
+      if (editando) fd.set("slug", livro!.id);
+      fd.set("titulo", titulo);
+      fd.set("autora", autora);
+      fd.set("selo", selo);
+      fd.set("sinopse", descricao);
+      fd.set("paginas", paginas);
+      fd.set("tags", tags.join(","));
+      fd.set("capa_de", capaDe);
+      fd.set("capa_para", capaPara);
+      fd.set("novo", novoLancamento ? "1" : "");
+      if (pdf_path) fd.set("pdf_path", pdf_path);
+      if (cover_path) fd.set("cover_path", cover_path);
+      if (removerCapa) fd.set("remover_capa", "1");
+
+      // Chama a action (que redireciona no fim).
+      if (editando) await atualizarLivro(fd);
+      else await criarLivro(fd);
+    } catch (err) {
+      setErroLocal(err instanceof Error ? err.message : "Erro ao publicar. Tente de novo.");
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
       <div className="space-y-6">
-        {erro && (
+        {(erro || erroLocal) && (
           <div className="flex items-center gap-2 rounded-lg border border-blood-600/40 bg-blood-900/30 px-3 py-2.5 text-sm text-smoke">
-            <AlertCircle size={15} /> {erro}
+            <AlertCircle size={15} /> {erroLocal || erro}
           </div>
         )}
 
@@ -80,15 +155,13 @@ export default function NovoLivroForm({
           </p>
 
           <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-ink-800/40 px-6 py-9 text-center transition-colors hover:border-champagne/40">
-            {pdf ? (
+            {pdfNome ? (
               <>
                 <span className="grid h-11 w-11 place-items-center rounded-xl bg-blood-800/40 text-champagne">
                   <FileText size={20} />
                 </span>
-                <span className="text-sm font-medium text-white">{pdf}</span>
-                <span className="text-xs text-champagne">
-                  {editando ? "Trocar PDF" : "Trocar arquivo"}
-                </span>
+                <span className="text-sm font-medium text-white">{pdfNome}</span>
+                <span className="text-xs text-champagne">{editando ? "Trocar PDF" : "Trocar arquivo"}</span>
               </>
             ) : (
               <>
@@ -103,10 +176,13 @@ export default function NovoLivroForm({
             )}
             <input
               type="file"
-              name="pdf"
               accept="application/pdf"
               className="hidden"
-              onChange={(e) => setPdf(e.target.files?.[0]?.name ?? (livro?.temPdf ? "PDF atual" : null))}
+              onChange={(e) => {
+                const f = e.target.files?.[0] ?? null;
+                setPdfFile(f);
+                setPdfNome(f?.name ?? (livro?.temPdf ? "PDF atual" : null));
+              }}
             />
           </label>
         </div>
@@ -117,19 +193,19 @@ export default function NovoLivroForm({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Campo label="Título" span2>
-              <input name="titulo" required value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex.: Assombrando Adeline" className={inputCls} />
+              <input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Ex.: Assombrando Adeline" className={inputCls} />
             </Campo>
             <Campo label="Autora">
-              <input name="autora" required value={autora} onChange={(e) => setAutora(e.target.value)} placeholder="Ex.: H. D. Carlton" className={inputCls} />
+              <input value={autora} onChange={(e) => setAutora(e.target.value)} placeholder="Ex.: H. D. Carlton" className={inputCls} />
             </Campo>
             <Campo label="Páginas">
-              <input name="paginas" type="number" min={0} defaultValue={livro?.paginas || ""} placeholder="Ex.: 320" className={inputCls} />
+              <input type="number" min={0} value={paginas} onChange={(e) => setPaginas(e.target.value)} placeholder="Ex.: 320" className={inputCls} />
             </Campo>
             <Campo label="Coleção / volume (selo da capa)" span2>
-              <input name="selo" value={selo} onChange={(e) => setSelo(e.target.value)} placeholder="Ex.: Gato e Rato · Vol. I" className={inputCls} />
+              <input value={selo} onChange={(e) => setSelo(e.target.value)} placeholder="Ex.: Gato e Rato · Vol. I" className={inputCls} />
             </Campo>
             <Campo label="Descrição / sinopse" span2>
-              <textarea name="sinopse" value={descricao} onChange={(e) => setDescricao(e.target.value)} rows={4} placeholder="Escreva a sinopse…" className={`${inputCls} resize-none`} />
+              <textarea value={descricao} onChange={(e) => setDescricao(e.target.value)} rows={4} placeholder="Escreva a sinopse…" className={`${inputCls} resize-none`} />
             </Campo>
           </div>
 
@@ -181,8 +257,16 @@ export default function NovoLivroForm({
         </div>
 
         <div className="flex items-center gap-3">
-          <button type="submit" className="btn-primary !py-3.5">
-            {editando ? "Salvar alterações" : "Publicar livro"}
+          <button type="submit" disabled={enviando} className="btn-primary !py-3.5 disabled:opacity-70">
+            {enviando ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Enviando…
+              </>
+            ) : editando ? (
+              "Salvar alterações"
+            ) : (
+              "Publicar livro"
+            )}
           </button>
           <Link href="/admin/catalogo" className="btn-ghost !py-3.5">Cancelar</Link>
         </div>
@@ -190,8 +274,6 @@ export default function NovoLivroForm({
 
       {/* Pré-visualização + capa */}
       <div className="lg:sticky lg:top-24 lg:h-fit">
-        <input type="hidden" name="remover_capa" value={removerCapa ? "1" : ""} />
-
         <p className="mb-3 text-xs font-medium uppercase tracking-wider text-white/45">Pré-visualização da capa</p>
         <div className="mx-auto w-52">
           <div className="overflow-hidden rounded-xl shadow-card ring-1 ring-white/10">
@@ -199,19 +281,18 @@ export default function NovoLivroForm({
           </div>
         </div>
 
-        {/* Enviar capa real (imagem da galeria) */}
         <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wider text-white/45">Capa do livro</p>
         <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-ink-800/40 px-4 py-3 text-center text-sm text-white/70 transition-colors hover:border-champagne/40">
           <ImageIcon size={16} className="text-champagne" />
           {coverPreview ? "Trocar imagem da capa" : "Enviar imagem da galeria"}
           <input
             type="file"
-            name="cover"
             accept="image/*"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
               if (f) {
+                setCoverFile(f);
                 setCoverPreview(URL.createObjectURL(f));
                 setRemoverCapa(false);
               }
@@ -223,14 +304,13 @@ export default function NovoLivroForm({
         {coverPreview && (
           <button
             type="button"
-            onClick={() => { setCoverPreview(null); setRemoverCapa(true); }}
+            onClick={() => { setCoverFile(null); setCoverPreview(null); setRemoverCapa(true); }}
             className="mt-2 text-xs text-white/50 underline underline-offset-2 hover:text-white"
           >
             Remover imagem e usar capa ilustrativa
           </button>
         )}
 
-        {/* Capa ilustrativa (gradiente) — usada quando não há imagem */}
         {!coverPreview && (
           <>
             <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wider text-white/45">Cor da capa ilustrativa</p>

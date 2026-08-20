@@ -15,21 +15,6 @@ function slugify(s: string): string {
     .slice(0, 60);
 }
 
-// Sobe a imagem de capa (galeria) no bucket público "covers" e devolve o caminho.
-async function uploadCapa(
-  client: Awaited<ReturnType<typeof createClient>>,
-  slug: string,
-  cover: File | null
-): Promise<string | null> {
-  if (!cover || cover.size === 0) return null;
-  const ext = (cover.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
-  const path = `${slug}-cover.${ext}`;
-  const { error } = await client.storage
-    .from("covers")
-    .upload(path, cover, { upsert: true, contentType: cover.type || undefined });
-  return error ? null : path;
-}
-
 export async function criarLivro(formData: FormData) {
   const titulo = String(formData.get("titulo") ?? "").trim();
   const autora = String(formData.get("autora") ?? "").trim();
@@ -49,19 +34,10 @@ export async function criarLivro(formData: FormData) {
   const admin = await createClient();
   const slug = slugify(titulo) || `livro-${Date.now()}`;
 
-  // Upload do PDF (se enviado) no bucket privado.
-  let pdf_path: string | null = null;
-  const pdf = formData.get("pdf") as File | null;
-  if (pdf && pdf.size > 0) {
-    const path = `${slug}.pdf`;
-    const { error } = await admin.storage
-      .from("pdfs")
-      .upload(path, pdf, { upsert: true, contentType: "application/pdf" });
-    if (!error) pdf_path = path;
-  }
-
-  // Upload da capa real (se enviada) no bucket público.
-  const cover_path = await uploadCapa(admin, slug, formData.get("cover") as File | null);
+  // Os arquivos já foram enviados direto do navegador pro storage;
+  // aqui recebemos apenas os caminhos.
+  const pdf_path = String(formData.get("pdf_path") ?? "") || null;
+  const cover_path = String(formData.get("cover_path") ?? "") || null;
 
   const { error } = await admin.from("books").insert({
     slug,
@@ -129,18 +105,11 @@ export async function atualizarLivro(formData: FormData) {
     lancado_em: novo ? new Date().toISOString().slice(0, 10) : null,
   };
 
-  // Troca do PDF (opcional).
-  const pdf = formData.get("pdf") as File | null;
-  if (pdf && pdf.size > 0) {
-    const path = `${slug}.pdf`;
-    const { error } = await supabase.storage
-      .from("pdfs")
-      .upload(path, pdf, { upsert: true, contentType: "application/pdf" });
-    if (!error) updates.pdf_path = path;
-  }
+  // Arquivos enviados no navegador → recebemos os caminhos.
+  const novoPdf = String(formData.get("pdf_path") ?? "");
+  if (novoPdf) updates.pdf_path = novoPdf;
 
-  // Capa: nova imagem, ou remover (volta pra ilustrativa).
-  const novaCapa = await uploadCapa(supabase, slug, formData.get("cover") as File | null);
+  const novaCapa = String(formData.get("cover_path") ?? "");
   if (novaCapa) {
     updates.cover_path = novaCapa;
   } else if (String(formData.get("remover_capa") ?? "") === "1") {
