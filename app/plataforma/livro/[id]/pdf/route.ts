@@ -27,10 +27,10 @@ export async function GET(
   const back = new URL(`/plataforma/livro/${params.id}`, req.url);
   if (!book?.pdf_path) return NextResponse.redirect(back);
 
-  const dl = req.nextUrl.searchParams.get("dl") === "1";
+  // Apenas leitura (inline) — download não é permitido.
   const { data, error } = await supabase.storage
     .from("pdfs")
-    .createSignedUrl(book.pdf_path, 120, dl ? { download: `${book.titulo}.pdf` } : {});
+    .createSignedUrl(book.pdf_path, 120);
 
   if (error || !data) return NextResponse.redirect(back);
   return NextResponse.redirect(data.signedUrl);

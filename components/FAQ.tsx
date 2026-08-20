@@ -9,8 +9,8 @@ const PERGUNTAS = [
     a: "Você escolhe um plano, cria sua conta e ganha acesso imediato à biblioteca completa. Novos títulos entram todo mês e ficam disponíveis enquanto sua assinatura estiver ativa.",
   },
   {
-    q: "Os livros são em PDF?",
-    a: "Sim. Cada título pode ser lido direto na plataforma ou baixado em PDF para ler offline no celular, tablet, e-reader ou computador — onde e quando quiser.",
+    q: "Como leio os livros?",
+    a: "Cada título é lido direto na plataforma — no celular, tablet ou computador, pelo navegador. É só entrar com a sua conta e abrir o livro, onde e quando quiser.",
   },
   {
     q: "Quantos livros posso ler por mês?",

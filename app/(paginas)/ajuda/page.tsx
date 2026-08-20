@@ -5,7 +5,7 @@ import { DocHeader } from "@/components/PageChrome";
 export const metadata = { title: "Central de ajuda — Vício em Dark Romance" };
 
 const TOPICOS = [
-  { icon: BookOpen, titulo: "Como ler os PDFs", desc: "Ler na plataforma, baixar e abrir no celular, tablet ou e-reader.", href: "/como-ler" },
+  { icon: BookOpen, titulo: "Como ler os livros", desc: "Leitura direto na plataforma, no celular, tablet ou computador.", href: "/como-ler" },
   { icon: CreditCard, titulo: "Pagamento e reembolso", desc: "Cobrança, cancelamento e como pedir reembolso.", href: "/reembolso" },
   { icon: UserRound, titulo: "Minha conta", desc: "Acesso, assinatura e dados pessoais.", href: "/plataforma/conta" },
   { icon: LifeBuoy, titulo: "Fale conosco", desc: "Não achou o que procurava? A gente responde rápido.", href: "/contato" },
@@ -14,7 +14,7 @@ const TOPICOS = [
 const FAQ = [
   { q: "Como funciona a assinatura?", a: "Você escolhe o plano, cria a conta e ganha acesso imediato à biblioteca completa. Novos títulos entram todo mês enquanto a assinatura estiver ativa." },
   { q: "Posso cancelar quando quiser?", a: "Sim. Sem fidelidade e sem multa — você continua com acesso até o fim do período já pago." },
-  { q: "Consigo ler offline?", a: "Sim. É só baixar o PDF do livro e ler onde quiser, mesmo sem internet." },
+  { q: "Onde consigo ler?", a: "Direto na plataforma, pelo navegador — no celular, tablet ou computador. Precisa de internet e da assinatura ativa." },
   { q: "O conteúdo é adulto?", a: "Sim, é dark romance com cenas sensuais e temas maduros, para maiores de 18 anos." },
 ];
 

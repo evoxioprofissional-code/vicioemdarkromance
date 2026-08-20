@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
-  Download,
   Clock,
   FileText,
   CalendarDays,
@@ -107,22 +106,14 @@ export default async function LivroPage({ params }: { params: { id: string } }) 
             {/* ações */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {livro.temPdf ? (
-                <>
-                  <a
-                    href={`/plataforma/livro/${livro.id}/pdf`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary"
-                  >
-                    <BookOpen size={16} /> Ler agora
-                  </a>
-                  <a
-                    href={`/plataforma/livro/${livro.id}/pdf?dl=1`}
-                    className="btn-ghost"
-                  >
-                    <Download size={16} /> Baixar PDF
-                  </a>
-                </>
+                <a
+                  href={`/plataforma/livro/${livro.id}/pdf`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary"
+                >
+                  <BookOpen size={16} /> Ler agora
+                </a>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2.5 text-sm text-white/45">
                   <BookOpen size={16} /> PDF em breve

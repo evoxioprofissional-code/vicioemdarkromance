@@ -16,7 +16,7 @@ const COLS = [
     titulo: "Ajuda",
     links: [
       { label: "Central de ajuda", href: "/ajuda" },
-      { label: "Como ler os PDFs", href: "/como-ler" },
+      { label: "Como ler os livros", href: "/como-ler" },
       { label: "Fale conosco", href: "/contato" },
     ],
   },

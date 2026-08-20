@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   BookOpen,
-  Download,
+  Smartphone,
   Flame,
   Quote,
   ArrowRight,
@@ -39,10 +39,10 @@ const PASSOS = [
       "A estante inteira libera na hora: máfia, inimigos para amantes, dark & forbidden e muito mais.",
   },
   {
-    icon: Download,
+    icon: Smartphone,
     titulo: "Leia onde quiser",
     texto:
-      "Leia na plataforma ou baixe em PDF para o celular, tablet ou e-reader. Sua vontade não tem horário.",
+      "Leia direto na plataforma, no celular, tablet ou computador — onde e quando bater a vontade.",
   },
 ];
 
@@ -63,7 +63,7 @@ const DEPOIMENTOS = [
     nome: "Camila T.",
     tag: "leitora fundadora",
     texto:
-      "Baixo os PDFs e leio no ônibus, na fila, antes de dormir. Melhor gasto de R$ 9,99 da minha vida — falo sem exagero nenhum.",
+      "Leio no ônibus, na fila, antes de dormir — a plataforma abre em qualquer lugar. Melhor gasto de R$ 9,99 da minha vida, falo sem exagero nenhum.",
   },
 ];
 
