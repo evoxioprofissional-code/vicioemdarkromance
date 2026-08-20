@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { criarLinkInfinitePay } from "@/lib/payments/infinitepay";
+import { criarAssinaturaMP } from "@/lib/payments/mercadopago";
 
 const PRECO_CENTS = 999;
 
@@ -40,4 +41,23 @@ export async function pagarComPix() {
   }
 
   redirect(url); // vai para o checkout da InfinitePay (Pix)
+}
+
+// Inicia a assinatura no cartão (Mercado Pago, recorrente mensal).
+export async function pagarComCartao() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/entrar?redirect=/checkout");
+  if (!user.email) {
+    redirect("/checkout?erro=" + encodeURIComponent("Sua conta precisa de um e-mail para o cartão."));
+  }
+
+  const url = await criarAssinaturaMP({ userId: user.id, email: user.email });
+  if (!url) {
+    redirect("/checkout?erro=" + encodeURIComponent("Não foi possível iniciar o cartão. Tente novamente em instantes."));
+  }
+
+  redirect(url); // vai para a autorização do cartão no Mercado Pago
 }

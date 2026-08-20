@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { getPlano } from "@/lib/queries/plans";
-import { pagarComPix } from "@/lib/actions/pagamento";
+import { pagarComPix, pagarComCartao } from "@/lib/actions/pagamento";
 import type { Plano } from "@/lib/types";
 
 function Resumo({ plano }: { plano: Plano }) {
@@ -123,10 +123,10 @@ export default async function CheckoutPage({
               </form>
             </div>
 
-            {/* Cartão — Mercado Pago (em breve) */}
-            <div className="glass rounded-2xl p-6 opacity-70">
+            {/* Cartão — Mercado Pago (recorrente) */}
+            <div className="glass rounded-2xl p-6">
               <div className="flex items-start gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5 text-white/50">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5 text-white/60 ring-1 ring-white/10">
                   <CreditCard size={22} />
                 </span>
                 <div className="flex-1">
@@ -135,13 +135,12 @@ export default async function CheckoutPage({
                     Renovação automática todo mês, sem precisar refazer nada.
                   </p>
                 </div>
-                <span className="rounded-full border border-white/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white/50">
-                  Em breve
-                </span>
               </div>
-              <button disabled className="btn-ghost mt-5 w-full cursor-default justify-center !py-3.5 opacity-60">
-                Cartão chegando em breve
-              </button>
+              <form action={pagarComCartao} className="mt-5">
+                <button type="submit" className="btn-ghost w-full justify-center !py-3.5">
+                  <CreditCard size={16} /> Assinar {plano.precoMes}/mês no cartão
+                </button>
+              </form>
             </div>
 
             <p className="flex items-center justify-center gap-2 pt-1 text-[11px] text-white/35">
