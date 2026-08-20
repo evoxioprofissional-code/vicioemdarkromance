@@ -25,7 +25,8 @@ export async function getDashboard() {
   const [{ count: ativos }, { count: totalPerfis }, { data: pagamentos }, { data: cancelamentos }] =
     await Promise.all([
       db.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
-      db.from("profiles").select("*", { count: "exact", head: true }),
+      // "clientes" = cadastros que não são admin (o dono não é cliente)
+      db.from("profiles").select("*", { count: "exact", head: true }).eq("role", "assinante"),
       db.from("payments").select("amount_cents, paid_at, status").eq("status", "paid"),
       db.from("subscriptions").select("canceled_at").not("canceled_at", "is", null),
     ]);
@@ -48,9 +49,9 @@ export async function getDashboard() {
     (c) => c.canceled_at && new Date(c.canceled_at) >= ha30
   ).length;
 
-  // Novos assinantes nos últimos 30 dias (perfis criados).
+  // Novos assinantes (pagantes) nos últimos 30 dias — assinaturas criadas.
   const { count: novos30d } = await db
-    .from("profiles")
+    .from("subscriptions")
     .select("*", { count: "exact", head: true })
     .gte("created_at", ha30.toISOString());
 
@@ -83,10 +84,10 @@ export async function getReceitaMensal() {
     .reduce((s, x) => s + (x.amount_cents ?? 0), 0));
 }
 
-// ---- Novos assinantes por mês (12 meses) ----
+// ---- Novos assinantes por mês (12 meses) — assinaturas (pagantes) ----
 export async function getNovosAssinantesMensal() {
   const db = await createClient();
-  const { data } = await db.from("profiles").select("created_at");
+  const { data } = await db.from("subscriptions").select("created_at");
   return ultimos12Meses((p) => (data ?? [])
     .filter((x) => x.created_at && mesmoMes(x.created_at, p.ano, p.mesIdx))
     .length);
