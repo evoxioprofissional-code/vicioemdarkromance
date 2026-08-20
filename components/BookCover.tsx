@@ -12,6 +12,23 @@ export default function BookCover({
   livro: Livro;
   className?: string;
 }) {
+  // Capa real (imagem enviada): mostra a imagem em vez do gradiente ilustrativo.
+  if (livro.coverUrl) {
+    return (
+      <div
+        className={`group relative aspect-[2/3] w-full overflow-hidden rounded-[10px] bg-ink-800 ${className}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={livro.coverUrl}
+          alt={`Capa de ${livro.titulo}`}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10" />
+      </div>
+    );
+  }
+
   return (
     <div
       className={`group relative aspect-[2/3] w-full overflow-hidden rounded-[10px] ${className}`}

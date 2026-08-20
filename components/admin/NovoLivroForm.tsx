@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { UploadCloud, FileText, Check, Clock, AlertCircle } from "lucide-react";
+import { UploadCloud, FileText, Check, Clock, AlertCircle, Image as ImageIcon } from "lucide-react";
 import BookCover from "@/components/BookCover";
 import { categorias, type Categoria, type Livro } from "@/lib/types";
 import { criarLivro, atualizarLivro } from "@/lib/actions/livros";
@@ -34,6 +34,8 @@ export default function NovoLivroForm({
   const [capaPara, setCapaPara] = useState(livro?.capa.para ?? PALETAS[1].para);
   const [pdf, setPdf] = useState<string | null>(livro?.temPdf ? "PDF atual" : null);
   const [novoLancamento, setNovoLancamento] = useState(livro?.novo ?? true);
+  const [coverPreview, setCoverPreview] = useState<string | null>(livro?.coverUrl ?? null);
+  const [removerCapa, setRemoverCapa] = useState(false);
 
   const preview: Livro = {
     id: "preview",
@@ -44,6 +46,7 @@ export default function NovoLivroForm({
     paginas: 0,
     ano: 2026,
     nota: 5,
+    coverUrl: coverPreview ?? undefined,
     capa: { de: capaDe, para: capaPara, selo: selo || "Coleção" },
   };
 
@@ -185,8 +188,10 @@ export default function NovoLivroForm({
         </div>
       </div>
 
-      {/* Pré-visualização */}
+      {/* Pré-visualização + capa */}
       <div className="lg:sticky lg:top-24 lg:h-fit">
+        <input type="hidden" name="remover_capa" value={removerCapa ? "1" : ""} />
+
         <p className="mb-3 text-xs font-medium uppercase tracking-wider text-white/45">Pré-visualização da capa</p>
         <div className="mx-auto w-52">
           <div className="overflow-hidden rounded-xl shadow-card ring-1 ring-white/10">
@@ -194,19 +199,55 @@ export default function NovoLivroForm({
           </div>
         </div>
 
-        <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wider text-white/45">Cor da capa</p>
-        <div className="grid grid-cols-6 gap-2">
-          {PALETAS.map((p, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => { setCapaDe(p.de); setCapaPara(p.para); }}
-              aria-label={`Paleta ${i + 1}`}
-              className={`h-9 rounded-lg ring-2 transition-all ${capaDe === p.de && capaPara === p.para ? "ring-champagne" : "ring-transparent hover:ring-white/20"}`}
-              style={{ background: `linear-gradient(135deg, ${p.de}, ${p.para})` }}
-            />
-          ))}
-        </div>
+        {/* Enviar capa real (imagem da galeria) */}
+        <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wider text-white/45">Capa do livro</p>
+        <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-ink-800/40 px-4 py-3 text-center text-sm text-white/70 transition-colors hover:border-champagne/40">
+          <ImageIcon size={16} className="text-champagne" />
+          {coverPreview ? "Trocar imagem da capa" : "Enviar imagem da galeria"}
+          <input
+            type="file"
+            name="cover"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) {
+                setCoverPreview(URL.createObjectURL(f));
+                setRemoverCapa(false);
+              }
+            }}
+          />
+        </label>
+        <p className="mt-1.5 text-[11px] text-white/35">JPG ou PNG · proporção retrato (2:3) fica melhor.</p>
+
+        {coverPreview && (
+          <button
+            type="button"
+            onClick={() => { setCoverPreview(null); setRemoverCapa(true); }}
+            className="mt-2 text-xs text-white/50 underline underline-offset-2 hover:text-white"
+          >
+            Remover imagem e usar capa ilustrativa
+          </button>
+        )}
+
+        {/* Capa ilustrativa (gradiente) — usada quando não há imagem */}
+        {!coverPreview && (
+          <>
+            <p className="mb-2 mt-6 text-xs font-medium uppercase tracking-wider text-white/45">Cor da capa ilustrativa</p>
+            <div className="grid grid-cols-6 gap-2">
+              {PALETAS.map((p, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => { setCapaDe(p.de); setCapaPara(p.para); }}
+                  aria-label={`Paleta ${i + 1}`}
+                  className={`h-9 rounded-lg ring-2 transition-all ${capaDe === p.de && capaPara === p.para ? "ring-champagne" : "ring-transparent hover:ring-white/20"}`}
+                  style={{ background: `linear-gradient(135deg, ${p.de}, ${p.para})` }}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </form>
   );

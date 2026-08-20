@@ -15,6 +15,21 @@ function slugify(s: string): string {
     .slice(0, 60);
 }
 
+// Sobe a imagem de capa (galeria) no bucket público "covers" e devolve o caminho.
+async function uploadCapa(
+  client: Awaited<ReturnType<typeof createClient>>,
+  slug: string,
+  cover: File | null
+): Promise<string | null> {
+  if (!cover || cover.size === 0) return null;
+  const ext = (cover.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = `${slug}-cover.${ext}`;
+  const { error } = await client.storage
+    .from("covers")
+    .upload(path, cover, { upsert: true, contentType: cover.type || undefined });
+  return error ? null : path;
+}
+
 export async function criarLivro(formData: FormData) {
   const titulo = String(formData.get("titulo") ?? "").trim();
   const autora = String(formData.get("autora") ?? "").trim();
@@ -45,6 +60,9 @@ export async function criarLivro(formData: FormData) {
     if (!error) pdf_path = path;
   }
 
+  // Upload da capa real (se enviada) no bucket público.
+  const cover_path = await uploadCapa(admin, slug, formData.get("cover") as File | null);
+
   const { error } = await admin.from("books").insert({
     slug,
     titulo,
@@ -59,6 +77,7 @@ export async function criarLivro(formData: FormData) {
     novo,
     lancado_em: novo ? new Date().toISOString().slice(0, 10) : null,
     pdf_path,
+    cover_path,
   });
 
   if (error) {
@@ -118,6 +137,14 @@ export async function atualizarLivro(formData: FormData) {
       .from("pdfs")
       .upload(path, pdf, { upsert: true, contentType: "application/pdf" });
     if (!error) updates.pdf_path = path;
+  }
+
+  // Capa: nova imagem, ou remover (volta pra ilustrativa).
+  const novaCapa = await uploadCapa(supabase, slug, formData.get("cover") as File | null);
+  if (novaCapa) {
+    updates.cover_path = novaCapa;
+  } else if (String(formData.get("remover_capa") ?? "") === "1") {
+    updates.cover_path = null;
   }
 
   const { error } = await supabase.from("books").update(updates).eq("slug", slug);
