@@ -15,6 +15,7 @@ export async function criarAssinaturaMP(params: {
   email: string;
   amount?: number;
 }): Promise<string | null> {
+  if (!MP_ACCESS_TOKEN) return null; // cartão não configurado
   try {
     const res = await fetch(`${MP}/preapproval`, {
       method: "POST",
