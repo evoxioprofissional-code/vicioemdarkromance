@@ -12,5 +12,6 @@ export default async function AdminLayout({
   if (!perfil) redirect("/entrar?redirect=/admin");
   if (perfil.role !== "admin") redirect("/plataforma");
 
-  return <AdminShell>{children}</AdminShell>;
+  const inicial = (perfil.nome || perfil.email || "A").charAt(0).toUpperCase();
+  return <AdminShell inicial={inicial}>{children}</AdminShell>;
 }

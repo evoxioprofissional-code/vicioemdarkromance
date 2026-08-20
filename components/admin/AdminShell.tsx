@@ -14,7 +14,6 @@ import {
   Menu,
   X,
   ExternalLink,
-  Bell,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 
@@ -29,8 +28,10 @@ const NAV = [
 
 export default function AdminShell({
   children,
+  inicial = "A",
 }: {
   children: React.ReactNode;
+  inicial?: string;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -110,16 +111,18 @@ export default function AdminShell({
             <p className="text-xs uppercase tracking-widest text-white/40">Painel administrativo</p>
             <p className="font-display text-lg font-bold text-white">Vício em Dark Romance</p>
           </div>
+          <Logo href="/admin" className="sm:hidden" />
 
           <div className="ml-auto flex items-center gap-2">
-            <Link href="/admin/catalogo/novo" className="btn-ghost !py-2 !px-4 !text-[13px]">
-              <Plus size={15} /> Novo livro
+            <Link
+              href="/admin/catalogo/novo"
+              className="btn-ghost !py-2 !px-3 !text-[13px]"
+              aria-label="Novo livro"
+            >
+              <Plus size={15} /> <span className="hidden sm:inline">Novo livro</span>
             </Link>
-            <button className="grid h-10 w-10 place-items-center rounded-full ring-1 ring-white/10 text-white/60 hover:text-white" aria-label="Notificações">
-              <Bell size={17} />
-            </button>
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-blood-800/40 font-display font-bold text-champagne ring-1 ring-champagne/20">
-              A
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blood-800/40 font-display font-bold text-champagne ring-1 ring-champagne/20">
+              {inicial}
             </span>
           </div>
         </div>
