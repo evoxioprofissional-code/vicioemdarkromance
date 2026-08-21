@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import Logo from "./Logo";
+import BuscaLivros from "./BuscaLivros";
 import { sair } from "@/lib/auth/actions";
 
 const NAV = [
@@ -109,10 +110,14 @@ export default function PlatformShell({
 
           <Logo href="/plataforma" className="lg:hidden" />
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 justify-center sm:justify-start">
+            <BuscaLivros />
+          </div>
+
+          <div className="flex items-center gap-2">
             <Link
               href="/plataforma/conta"
-              className="grid h-10 w-10 place-items-center rounded-full bg-blood-800/40 font-display font-bold text-champagne ring-1 ring-champagne/20"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-blood-800/40 font-display font-bold text-champagne ring-1 ring-champagne/20"
             >
               {inicial}
             </Link>

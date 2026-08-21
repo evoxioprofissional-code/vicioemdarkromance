@@ -33,6 +33,26 @@ export async function getLivro(slug: string): Promise<Livro | null> {
   return mapRows([data as BookRow], supabase)[0];
 }
 
+// Busca livros por título, autora ou sinopse (usada pela barra de busca).
+export async function buscarLivros(termo: string): Promise<Livro[]> {
+  const t = (termo ?? "").trim();
+  if (!t) return [];
+  // Remove caracteres que quebrariam o filtro do PostgREST (vírgula, %, etc.).
+  const safe = t.replace(/[,%()*\\]/g, " ").trim();
+  if (!safe) return [];
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("books")
+    .select("*")
+    .or(
+      `titulo.ilike.%${safe}%,autora.ilike.%${safe}%,sinopse.ilike.%${safe}%`
+    )
+    .order("nota", { ascending: false })
+    .limit(60);
+  return mapRows((data ?? []) as BookRow[], supabase);
+}
+
 export async function getLancamentos(): Promise<Livro[]> {
   const supabase = await createClient();
   const { data } = await supabase
