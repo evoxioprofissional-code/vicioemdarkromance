@@ -7,11 +7,12 @@ import {
   CreditCard,
   CheckCircle2,
   QrCode,
+  Apple,
   AlertCircle,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import { getPlano } from "@/lib/queries/plans";
-import { pagarComPix, pagarComCartao } from "@/lib/actions/pagamento";
+import { iniciarPagamento } from "@/lib/actions/pagamento";
 import type { Plano } from "@/lib/types";
 
 function Resumo({ plano }: { plano: Plano }) {
@@ -100,52 +101,49 @@ export default async function CheckoutPage({
 
         <div className="grid gap-8 lg:grid-cols-[1.4fr_0.9fr]">
           <div className="space-y-4">
-            {/* Pix — InfinitePay */}
+            {/* Pagamento — InfinitePay (Pix, cartão e Apple Pay) */}
             <div className="glass rounded-2xl p-6">
               <div className="flex items-start gap-4">
                 <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/20">
-                  <QrCode size={22} />
+                  <Lock size={22} />
                 </span>
                 <div className="flex-1">
-                  <h3 className="font-display text-lg font-bold text-white">Pix</h3>
+                  <h3 className="font-display text-lg font-bold text-white">
+                    Pagamento seguro
+                  </h3>
                   <p className="mt-0.5 text-sm text-white/55">
-                    Aprovação na hora. Você paga, o acesso libera na sequência.
+                    Na próxima tela você escolhe como pagar. O acesso libera assim
+                    que o pagamento é aprovado.
                   </p>
                 </div>
-                <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
-                  Recomendado
-                </span>
               </div>
-              <form action={pagarComPix} className="mt-5">
-                <button type="submit" className="btn-primary w-full justify-center !py-3.5">
-                  <QrCode size={16} /> Pagar {plano.precoMes} com Pix
-                </button>
-              </form>
-            </div>
 
-            {/* Cartão — Mercado Pago (recorrente) */}
-            <div className="glass rounded-2xl p-6">
-              <div className="flex items-start gap-4">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/5 text-white/60 ring-1 ring-white/10">
-                  <CreditCard size={22} />
-                </span>
-                <div className="flex-1">
-                  <h3 className="font-display text-lg font-bold text-white">Cartão de crédito</h3>
-                  <p className="mt-0.5 text-sm text-white/55">
-                    Renovação automática todo mês, sem precisar refazer nada.
-                  </p>
-                </div>
+              {/* Métodos aceitos */}
+              <div className="mt-5 flex flex-wrap gap-2">
+                {[
+                  { icon: QrCode, label: "Pix" },
+                  { icon: CreditCard, label: "Cartão de crédito" },
+                  { icon: Apple, label: "Apple Pay" },
+                ].map((m) => (
+                  <span
+                    key={m.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70"
+                  >
+                    <m.icon size={14} className="text-champagne" /> {m.label}
+                  </span>
+                ))}
               </div>
-              <form action={pagarComCartao} className="mt-5">
-                <button type="submit" className="btn-ghost w-full justify-center !py-3.5">
-                  <CreditCard size={16} /> Assinar {plano.precoMes}/mês no cartão
+
+              <form action={iniciarPagamento} className="mt-5">
+                <button type="submit" className="btn-primary w-full justify-center !py-3.5">
+                  <Lock size={16} /> Pagar {plano.precoMes} com segurança
                 </button>
               </form>
             </div>
 
             <p className="flex items-center justify-center gap-2 pt-1 text-[11px] text-white/35">
               <ShieldCheck size={14} className="text-champagne" />
-              Ambiente seguro · você confirma o pagamento no app do seu banco
+              Ambiente seguro · pagamento processado pela InfinitePay
             </p>
           </div>
 

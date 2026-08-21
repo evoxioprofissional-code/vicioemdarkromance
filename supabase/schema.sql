@@ -95,7 +95,7 @@ create table if not exists public.subscriptions (
   current_period_end     timestamptz,
   cancel_reason          text,
   canceled_at            timestamptz,
-  gateway                text,                        -- 'mercadopago' | 'stripe' | ...
+  gateway                text,                        -- 'infinitepay' | ...
   gateway_customer_id    text,
   gateway_subscription_id text,
   created_at             timestamptz not null default now(),
