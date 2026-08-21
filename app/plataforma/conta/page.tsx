@@ -171,7 +171,7 @@ export default async function ContaPage({
               return (
                 <Link
                   key={i}
-                  href={`/plataforma/livro/${l.slug}`}
+                  href={`/plataforma/livro/${l.slug}/ler`}
                   className="group flex items-center gap-4 rounded-2xl border border-white/5 bg-ink-800/40 p-3 transition-colors hover:border-champagne/20"
                 >
                   <span
@@ -182,7 +182,12 @@ export default async function ContaPage({
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display text-base font-semibold text-white">{l.titulo}</p>
-                    <p className="truncate text-xs text-white/45">{l.autora}</p>
+                    <p className="truncate text-xs text-white/45">
+                      {l.autora}
+                      {p.total_pages
+                        ? ` · página ${p.current_page} de ${p.total_pages}`
+                        : ""}
+                    </p>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-blood-600 to-champagne"

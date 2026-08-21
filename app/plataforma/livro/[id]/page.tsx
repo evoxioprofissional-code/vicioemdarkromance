@@ -11,7 +11,7 @@ import BookCover from "@/components/BookCover";
 import BookCard from "@/components/BookCard";
 import Stars from "@/components/Stars";
 import { getLivro, getRelacionados } from "@/lib/queries/books";
-import { exigirAcessoConteudo } from "@/lib/queries/account";
+import { exigirAcessoConteudo, getProgressoLivro } from "@/lib/queries/account";
 
 export default async function LivroPage({ params }: { params: { id: string } }) {
   await exigirAcessoConteudo();
@@ -19,7 +19,11 @@ export default async function LivroPage({ params }: { params: { id: string } }) 
   const livro = await getLivro(params.id);
   if (!livro) return notFound();
 
-  const sugestoes = await getRelacionados(livro);
+  const [sugestoes, progresso] = await Promise.all([
+    getRelacionados(livro),
+    getProgressoLivro(livro.id),
+  ]);
+  const jaComecou = !!progresso && progresso.currentPage > 1;
   const meta = [
     { icon: FileText, label: "Páginas", valor: String(livro.paginas) },
     { icon: Clock, label: "Leitura", valor: `~${Math.round(livro.paginas / 45)}h` },
@@ -106,17 +110,20 @@ export default async function LivroPage({ params }: { params: { id: string } }) 
             {/* ações */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
               {livro.temPdf ? (
-                <a
-                  href={`/plataforma/livro/${livro.id}/pdf`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                >
-                  <BookOpen size={16} /> Ler agora
-                </a>
+                <Link href={`/plataforma/livro/${livro.id}/ler`} className="btn-primary">
+                  <BookOpen size={16} />
+                  {jaComecou
+                    ? `Continuar da página ${progresso!.currentPage}`
+                    : "Ler agora"}
+                </Link>
               ) : (
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2.5 text-sm text-white/45">
                   <BookOpen size={16} /> PDF em breve
+                </span>
+              )}
+              {jaComecou && (
+                <span className="text-sm text-white/45">
+                  {progresso!.percent}% lido
                 </span>
               )}
             </div>

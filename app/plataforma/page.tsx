@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Play, LibraryBig, BookMarked } from "lucide-react";
 import Shelf from "@/components/Shelf";
+import ContinuarLendo from "@/components/ContinuarLendo";
 import BookCard from "@/components/BookCard";
 import Stars from "@/components/Stars";
 import {
@@ -10,12 +11,12 @@ import {
   getPorCategoria,
   getDestaque,
 } from "@/lib/queries/books";
-import { exigirAcessoConteudo } from "@/lib/queries/account";
+import { exigirAcessoConteudo, getMeuProgresso } from "@/lib/queries/account";
 
 export default async function PlataformaHome() {
   await exigirAcessoConteudo();
 
-  const [catalogo, destaque, novos, lidos, mafia, inimigos, dark] =
+  const [catalogo, destaque, novos, lidos, mafia, inimigos, dark, progresso] =
     await Promise.all([
       getCatalogo(),
       getDestaque(),
@@ -24,6 +25,7 @@ export default async function PlataformaHome() {
       getPorCategoria("Máfia Romance"),
       getPorCategoria("Inimigos para Amantes"),
       getPorCategoria("Dark & Forbidden"),
+      getMeuProgresso(),
     ]);
 
   if (!destaque) {
@@ -76,6 +78,9 @@ export default async function PlataformaHome() {
           </div>
         </div>
       </section>
+
+      {/* ---------- Continuar lendo / lidos recentemente ---------- */}
+      <ContinuarLendo itens={progresso as any} />
 
       {/* ---------- Prateleiras por categoria ---------- */}
       {novos.length > 0 && <Shelf titulo="Lançamentos do mês" livros={novos} />}

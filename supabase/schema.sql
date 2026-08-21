@@ -138,12 +138,17 @@ create table if not exists public.payments (
 -- 6) PROGRESSO DE LEITURA
 -- ----------------------------------------------------------------
 create table if not exists public.reading_progress (
-  user_id    uuid references public.profiles(id) on delete cascade,
-  book_id    uuid references public.books(id) on delete cascade,
-  percent    int default 0 check (percent between 0 and 100),
-  updated_at timestamptz not null default now(),
+  user_id      uuid references public.profiles(id) on delete cascade,
+  book_id      uuid references public.books(id) on delete cascade,
+  percent      int default 0 check (percent between 0 and 100),
+  current_page int not null default 1 check (current_page >= 1),
+  total_pages  int,
+  updated_at   timestamptz not null default now(),
   primary key (user_id, book_id)
 );
+
+create index if not exists reading_progress_user_updated_idx
+  on public.reading_progress (user_id, updated_at desc);
 
 -- ============================================================
 --  ROW LEVEL SECURITY (RLS)

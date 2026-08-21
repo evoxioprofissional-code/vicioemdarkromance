@@ -140,7 +140,7 @@ export async function getMinhasSugestoes(): Promise<Sugestao[]> {
   return (data ?? []) as Sugestao[];
 }
 
-// Progresso de leitura do usuário (para "continuar lendo").
+// Progresso de leitura do usuário (para "continuar lendo" / "lidos recentemente").
 export async function getMeuProgresso() {
   const supabase = await createClient();
   const {
@@ -150,9 +150,39 @@ export async function getMeuProgresso() {
 
   const { data } = await supabase
     .from("reading_progress")
-    .select("percent, updated_at, books(slug, titulo, autora, nota, capa_de, capa_para)")
+    .select(
+      "percent, current_page, total_pages, updated_at, books(slug, titulo, autora, nota, capa_de, capa_para, cover_path)"
+    )
     .eq("user_id", user.id)
     .order("updated_at", { ascending: false });
 
   return data ?? [];
+}
+
+// Progresso de UM livro específico (usado pelo leitor para retomar a página).
+export async function getProgressoLivro(
+  slug: string
+): Promise<{ currentPage: number; percent: number } | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: book } = await supabase
+    .from("books")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (!book?.id) return null;
+
+  const { data } = await supabase
+    .from("reading_progress")
+    .select("current_page, percent")
+    .eq("user_id", user.id)
+    .eq("book_id", book.id)
+    .maybeSingle();
+
+  if (!data) return null;
+  return { currentPage: data.current_page ?? 1, percent: data.percent ?? 0 };
 }
