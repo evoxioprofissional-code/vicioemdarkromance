@@ -106,6 +106,27 @@ export function emLancamento(livro: Livro): boolean {
   return diasRestantesLancamento(livro) > 0;
 }
 
+// ---- Anotações de leitura (grifos, marcadores, notas) ----
+export type TipoAnotacao = "grifo" | "marcador" | "nota";
+
+export interface RetanguloNorm {
+  x: number; // 0..1 relativo à largura da página
+  y: number; // 0..1 relativo à altura da página
+  w: number;
+  h: number;
+}
+
+export interface Anotacao {
+  id: string;
+  page: number;
+  tipo: TipoAnotacao;
+  cor: string;
+  texto: string | null;
+  nota: string | null;
+  rects: RetanguloNorm[] | null;
+  created_at: string;
+}
+
 // ---- Planos ----
 export interface Plano {
   id: string;

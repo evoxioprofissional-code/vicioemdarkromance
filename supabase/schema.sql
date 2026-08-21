@@ -150,6 +150,23 @@ create table if not exists public.reading_progress (
 create index if not exists reading_progress_user_updated_idx
   on public.reading_progress (user_id, updated_at desc);
 
+-- ---- ANOTAÇÕES (grifos, marcadores e notas) ----
+create table if not exists public.annotations (
+  id         uuid primary key default gen_random_uuid(),
+  user_id    uuid not null references public.profiles(id) on delete cascade,
+  book_id    uuid not null references public.books(id) on delete cascade,
+  page       int  not null check (page >= 1),
+  tipo       text not null check (tipo in ('grifo', 'marcador', 'nota')),
+  cor        text not null default 'amarelo',
+  texto      text,
+  nota       text,
+  rects      jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_annotations_user_book
+  on public.annotations (user_id, book_id, page);
+
 -- ============================================================
 --  ROW LEVEL SECURITY (RLS)
 -- ============================================================
@@ -191,6 +208,12 @@ create policy "pagamentos: ver os próprios" on public.payments
 -- ---- READING PROGRESS ----
 drop policy if exists "progresso: gerenciar o próprio" on public.reading_progress;
 create policy "progresso: gerenciar o próprio" on public.reading_progress
+  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- ---- ANNOTATIONS ----
+alter table public.annotations enable row level security;
+drop policy if exists "anotacoes: gerenciar as próprias" on public.annotations;
+create policy "anotacoes: gerenciar as próprias" on public.annotations
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 -- ============================================================

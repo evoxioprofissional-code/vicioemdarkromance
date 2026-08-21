@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import LeitorClient from "@/components/LeitorClient";
 import { getLivro } from "@/lib/queries/books";
 import { exigirAcessoConteudo, getProgressoLivro } from "@/lib/queries/account";
+import { listarAnotacoes } from "@/lib/actions/anotacoes";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,10 @@ export default async function LerPage({ params }: { params: { id: string } }) {
     );
   }
 
-  const progresso = await getProgressoLivro(livro.id);
+  const [progresso, anotacoes] = await Promise.all([
+    getProgressoLivro(livro.id),
+    listarAnotacoes(livro.id),
+  ]);
 
   return (
     <LeitorClient
@@ -37,6 +41,7 @@ export default async function LerPage({ params }: { params: { id: string } }) {
       titulo={livro.titulo}
       fileUrl={`/plataforma/livro/${livro.id}/arquivo`}
       startPage={progresso?.currentPage ?? 1}
+      anotacoesIniciais={anotacoes}
     />
   );
 }

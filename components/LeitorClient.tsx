@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
+import type { Anotacao } from "@/lib/types";
 
 // O leitor usa pdf.js (APIs de navegador). Carregamos só no cliente (ssr:false).
 const LeitorPdf = dynamic(() => import("./LeitorPdf"), {
@@ -18,6 +19,7 @@ export default function LeitorClient(props: {
   titulo: string;
   fileUrl: string;
   startPage: number;
+  anotacoesIniciais: Anotacao[];
 }) {
   return <LeitorPdf {...props} />;
 }
